@@ -1,0 +1,48 @@
+@import '~@fullcalendar/core/main.css';
+@import '~@fullcalendar/daygrid/main.css';
+
+html,
+body {
+  height: 100%;
+}
+
+.fc {
+  .fc-title {
+    white-space: normal;
+  }
+  .fc-day {
+    cursor: pointer;
+  }
+}
+
+.color-picker-wrapper {
+  position: relative;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  input {
+    display: block;
+    margin: 6px 0 7px;
+  }
+  .color-picker-value {
+    width: 2em;
+    height: 1em;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  .color-picker-label {
+    color: rgba(0, 0, 0, 0.54);
+    padding: 0;
+    font-size: 0.75em;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.00938em;
+  }
+  .chrome-picker {
+    position: absolute;
+    top: 2em;
+    z-index: 2;
+    left: 0;
+  }
+}
