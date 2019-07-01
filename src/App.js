@@ -223,25 +223,33 @@ function App() {
             onInput={handleTitleInput}
           />
           <MuiPickersUtilsProvider utils={DateFnsUtils} locale={zhCNLocale}>
-            <Grid container justify="space-around">
-              <KeyboardDatePicker
-                margin="dense"
-                disableToolbar
-                variant="inline"
-                fullWidth
-                label="开始时间"
-                value={currentEvent.start}
-                onChange={handleStartDateChange}
-              />
-              <KeyboardDatePicker
-                margin="dense"
-                disableToolbar
-                variant="inline"
-                fullWidth
-                label="结束时间"
-                value={currentEvent.end}
-                onChange={handleEndDateChange}
-              />
+            <Grid container justify="space-between" spacing={3}>
+              <Grid item xs={6}>
+                <KeyboardDatePicker
+                  autoOk
+                  fullWidth
+                  format="yyyy-MM-dd"
+                  margin="dense"
+                  disableToolbar
+                  variant="inline"
+                  label="开始时间"
+                  value={currentEvent.start}
+                  onChange={handleStartDateChange}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <KeyboardDatePicker
+                  autoOk
+                  fullWidth
+                  format="yyyy-MM-dd"
+                  margin="dense"
+                  disableToolbar
+                  variant="inline"
+                  label="结束时间"
+                  value={currentEvent.end}
+                  onChange={handleEndDateChange}
+                />
+              </Grid>
             </Grid>
           </MuiPickersUtilsProvider>
           <div className="color-picker-wrapper">
