@@ -38,10 +38,11 @@ function App() {
   const [isEdit, setIsEdit] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
 
-  let fc = null
-  window.onresize = function() {
-    // fc.updateSize()
-  }
+  let fc = React.useRef()
+  let calendarWrapper = React.useRef()
+  // window.onresize = function() {
+  //   // fc.updateSize()
+  // }
   React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
   })
@@ -190,10 +191,10 @@ function App() {
             保存
           </Button>
         </div>
-        <div className="calendar-wrapper">
+        <div className="calendar-wrapper" ref={calendarWrapper}>
           <FullCalendar
             height="parent"
-            ref={ref => (fc = ref)}
+            ref={fc}
             events={event}
             eventClick={handleEventClick}
             selectable

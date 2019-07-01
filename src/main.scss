@@ -13,6 +13,36 @@ body {
   .fc-day {
     cursor: pointer;
   }
+  .fc-event {
+    border-radius: 0;
+    padding: 0.5em;
+  }
+  .fc-toolbar h2 {
+    font-weight: 200;
+  }
+  .fc-toolbar.fc-header-toolbar {
+    padding-top: 0.75em;
+    color: #3c4043;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 16px;
+    letter-spacing: 0;
+    line-height: 28px;
+    white-space: nowrap;
+  }
+  .fc-day-top {
+    color: #70757a;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 20px;
+    text-align: center;
+    .fc-day-number {
+      float: left !important;
+    }
+  }
+  .fc-day-header {
+    padding: 0.5em;
+    color: #70757a;
+  }
 }
 
 main {
@@ -29,6 +59,7 @@ main {
   .calendar-wrapper {
     height: 100%;
     box-sizing: border-box;
+    padding: 0 2em;
     flex: 1;
   }
 }
