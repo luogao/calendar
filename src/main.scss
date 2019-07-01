@@ -4,6 +4,7 @@
 html,
 body {
   height: 100%;
+  overflow: hidden;
 }
 
 .fc {
@@ -43,6 +44,17 @@ body {
     padding: 0.5em;
     color: #70757a;
   }
+  .fc-view {
+    padding-bottom: 2em;
+  }
+  .fc-button {
+    border-radius: 0;
+  }
+  .fc-button-group {
+    .fc-prev-button {
+      margin-right: 0.5em;
+    }
+  }
 }
 
 main {
@@ -55,6 +67,9 @@ main {
     padding: 2em;
     flex-shrink: 0;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
   }
   .calendar-wrapper {
     height: 100%;

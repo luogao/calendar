@@ -84,7 +84,9 @@ function App() {
   }
 
   function handleSave() {
-    html2canvas(document.querySelector('.calendar-wrapper')).then(function(canvas) {
+    html2canvas(document.querySelector('.calendar-wrapper'), {
+      ignoreElements: el => el.className === 'fc-right'
+    }).then(function(canvas) {
       downloadFile(generate(), getImgSrc(canvas))
     })
   }
@@ -110,9 +112,9 @@ function App() {
   }
 
   function generate() {
-    const logoMarker = 'calendar'
-    const date = new Date().toLocaleDateString()
-    return `${logoMarker}-${date}`
+    const prefix = 'calendar'
+    const id = nanoid(5)
+    return `${prefix}-${id}`
   }
 
   function downloadFile(fileName, content) {
@@ -186,11 +188,6 @@ function App() {
   return (
     <div className="App">
       <main>
-        <div className="side-bar">
-          <Button onClick={handleSave} variant="contained" color="primary" fullWidth>
-            保存
-          </Button>
-        </div>
         <div className="calendar-wrapper" ref={calendarWrapper}>
           <FullCalendar
             height="parent"
@@ -209,6 +206,11 @@ function App() {
             plugins={[dayGridPlugin, interactionPlugin]}
             eventDrop={handleEventDrop}
           />
+        </div>
+        <div className="side-bar">
+          <Button onClick={handleSave} variant="contained" color="primary" fullWidth>
+            保存
+          </Button>
         </div>
       </main>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth="sm" fullWidth>
