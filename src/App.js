@@ -38,6 +38,10 @@ function App() {
   const [isEdit, setIsEdit] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
 
+  let fc = null
+  window.onresize = function() {
+    // fc.updateSize()
+  }
   React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
   })
@@ -79,9 +83,43 @@ function App() {
   }
 
   function handleSave() {
-    html2canvas(document.querySelector('main')).then(function(canvas) {
-      document.body.appendChild(canvas)
+    html2canvas(document.querySelector('.calendar-wrapper')).then(function(canvas) {
+      downloadFile(generate(), getImgSrc(canvas))
     })
+  }
+
+  function getImgSrc(canvas) {
+    const dataUrl = canvas.toDataURL('image/png')
+    return dataUrl
+  }
+
+  function base64Img2Blob(code) {
+    var parts = code.split(';base64,')
+    var contentType = parts[0].split(':')[1]
+    var raw = window.atob(parts[1])
+    var rawLength = raw.length
+
+    var uInt8Array = new Uint8Array(rawLength)
+
+    for (var i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i)
+    }
+
+    return new Blob([uInt8Array], { type: contentType })
+  }
+
+  function generate() {
+    const logoMarker = 'calendar'
+    const date = new Date().toLocaleDateString()
+    return `${logoMarker}-${date}`
+  }
+
+  function downloadFile(fileName, content) {
+    var aLink = document.createElement('a')
+    var blob = base64Img2Blob(content) //new Blob([content]);
+    aLink.download = fileName
+    aLink.href = URL.createObjectURL(blob)
+    aLink.click()
   }
 
   function handleCancel() {
@@ -147,23 +185,30 @@ function App() {
   return (
     <div className="App">
       <main>
-        <FullCalendar
-          height={document.body.clientHeight}
-          events={event}
-          eventClick={handleEventClick}
-          selectable
-          eventStartEditable
-          droppable
-          editable
-          dateClick={handleDateClick}
-          select={handleSelect}
-          locale={zhCnLocale}
-          theme="cosmo"
-          defaultView="dayGridMonth"
-          plugins={[dayGridPlugin, interactionPlugin]}
-          eventDrop={handleEventDrop}
-        />
-        <button onClick={handleSave}>保存</button>
+        <div className="side-bar">
+          <Button onClick={handleSave} variant="contained" color="primary" fullWidth>
+            保存
+          </Button>
+        </div>
+        <div className="calendar-wrapper">
+          <FullCalendar
+            height="parent"
+            ref={ref => (fc = ref)}
+            events={event}
+            eventClick={handleEventClick}
+            selectable
+            eventStartEditable
+            droppable
+            editable
+            dateClick={handleDateClick}
+            select={handleSelect}
+            locale={zhCnLocale}
+            theme="cosmo"
+            defaultView="dayGridMonth"
+            plugins={[dayGridPlugin, interactionPlugin]}
+            eventDrop={handleEventDrop}
+          />
+        </div>
       </main>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth="sm" fullWidth>
         <DialogTitle id="form-dialog-title">{isEdit ? '编辑日程' : '新建日程'}</DialogTitle>
@@ -207,16 +252,6 @@ function App() {
             <div className="color-picker-label">背景颜色</div>
             <input type="color" value={currentEvent.backgroundColor} onChange={handleBgColorChange} />
           </div>
-          {/* <div className="color-picker-wrapper">
-            <div className="color-picker-label">选择字体颜色</div>
-            <div className="color-picker-value" style={{ backgroundColor: currentEvent.color }} />
-            <ChromePicker value={currentEvent.color} />
-          </div>
-          <div className="color-picker-wrapper">
-            <div className="color-picker-label">选择背景颜色</div>
-            <div className="color-picker-value" style={{ backgroundColor: currentEvent.backgroundColor }} />
-            <ChromePicker value={currentEvent.backgroundColor} />
-          </div> */}
         </DialogContent>
         <DialogActions>
           {currentEvent.id && (

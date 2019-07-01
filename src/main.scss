@@ -15,6 +15,24 @@ body {
   }
 }
 
+main {
+  display: flex;
+  height: 100vh;
+  flex-direction: row;
+  .side-bar {
+    width: 200px;
+    height: 100vh;
+    padding: 2em;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+  .calendar-wrapper {
+    height: 100%;
+    box-sizing: border-box;
+    flex: 1;
+  }
+}
+
 .color-picker-wrapper {
   position: relative;
   text-align: left;
