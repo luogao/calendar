@@ -256,11 +256,11 @@ function App() {
             </Grid>
           </MuiPickersUtilsProvider>
           <div className="color-picker-wrapper">
-            <div className="color-picker-label">文字颜色</div>
+            <div className="color-picker-label"> 文字 </div>
             <input type="color" value={currentEvent.textColor} onChange={handleTextColorChange} />
           </div>
           <div className="color-picker-wrapper">
-            <div className="color-picker-label">背景颜色</div>
+            <div className="color-picker-label"> 背景 </div>
             <input type="color" value={currentEvent.backgroundColor} onChange={handleBgColorChange} />
           </div>
         </DialogContent>
