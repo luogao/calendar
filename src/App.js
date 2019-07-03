@@ -40,9 +40,7 @@ function App() {
 
   let fc = React.useRef()
   let calendarWrapper = React.useRef()
-  // window.onresize = function() {
-  //   // fc.updateSize()
-  // }
+
   React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
   })
@@ -217,6 +215,7 @@ function App() {
         <DialogTitle id="form-dialog-title">{isEdit ? '编辑日程' : '新建日程'}</DialogTitle>
         <DialogContent>
           <TextField
+            multiline
             autoFocus
             margin="dense"
             label="日程内容"
