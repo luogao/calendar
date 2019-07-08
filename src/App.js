@@ -18,8 +18,26 @@ import Grid from '@material-ui/core/Grid'
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 import zhCNLocale from 'date-fns/locale/zh-CN'
+import * as firebase from 'firebase/app'
 
-import './main.scss' // webpack must be configured to do this
+import 'firebase/auth'
+import 'firebase/database'
+
+import './main.scss'
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: 'AIzaSyDt4nt2i8Pnu_AIB00zvhIHBKStiNYBcwE',
+  authDomain: 'calendar-lg.firebaseapp.com',
+  databaseURL: 'https://calendar-lg.firebaseio.com',
+  projectId: 'calendar-lg',
+  storageBucket: '',
+  messagingSenderId: '120685637335',
+  appId: '1:120685637335:web:b819bfbce6424745'
+}
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig)
+
+// webpack must be configured to do this
 const CALENDAR_STORE_KEY = 'calendar_event_store'
 const emptyEvent = {
   title: '无标题',
