@@ -18,24 +18,7 @@ import Grid from '@material-ui/core/Grid'
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 import zhCNLocale from 'date-fns/locale/zh-CN'
-import * as firebase from 'firebase/app'
-
-import 'firebase/auth'
-import 'firebase/database'
-
 import './main.scss'
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: 'AIzaSyDt4nt2i8Pnu_AIB00zvhIHBKStiNYBcwE',
-  authDomain: 'calendar-lg.firebaseapp.com',
-  databaseURL: 'https://calendar-lg.firebaseio.com',
-  projectId: 'calendar-lg',
-  storageBucket: '',
-  messagingSenderId: '120685637335',
-  appId: '1:120685637335:web:b819bfbce6424745'
-}
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig)
 
 // webpack must be configured to do this
 const CALENDAR_STORE_KEY = 'calendar_event_store'
@@ -50,7 +33,10 @@ const emptyEvent = {
 }
 
 function App() {
-  const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY) ? JSON.parse(localStorage.getItem(CALENDAR_STORE_KEY)) : []
+  
+  const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
+    ? JSON.parse(localStorage.getItem(CALENDAR_STORE_KEY))
+    : []
   const [event, setEvent] = React.useState(storeEvent)
   const [open, setOpen] = React.useState(false)
   const [isEdit, setIsEdit] = React.useState(false)
@@ -234,7 +220,13 @@ function App() {
           </Button>
         </div>
       </main>
-      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth="sm" fullWidth>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="form-dialog-title"
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle id="form-dialog-title">{isEdit ? '编辑日程' : '新建日程'}</DialogTitle>
         <DialogContent>
           <TextField
@@ -283,7 +275,11 @@ function App() {
           </div>
           <div className="color-picker-wrapper">
             <div className="color-picker-label"> 背景 </div>
-            <input type="color" value={currentEvent.backgroundColor} onChange={handleBgColorChange} />
+            <input
+              type="color"
+              value={currentEvent.backgroundColor}
+              onChange={handleBgColorChange}
+            />
           </div>
         </DialogContent>
         <DialogActions>
