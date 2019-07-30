@@ -19,6 +19,7 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns'
 import zhCNLocale from 'date-fns/locale/zh-CN'
 import './main.scss'
+import LC from './AVStore'
 
 // webpack must be configured to do this
 const CALENDAR_STORE_KEY = 'calendar_event_store'
@@ -33,7 +34,6 @@ const emptyEvent = {
 }
 
 function App() {
-  
   const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
     ? JSON.parse(localStorage.getItem(CALENDAR_STORE_KEY))
     : []
