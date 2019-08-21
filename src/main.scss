@@ -71,14 +71,28 @@ main {
     flex-direction: column;
     justify-content: flex-end;
     button {
-      margin-bottom: .2em;
+      margin-bottom: 0.2em;
     }
   }
+  .main-content-wrapper {
+    flex: 1;
+    flex-direction: column;
+    display: flex;
+    padding-bottom: 2em;
+  }
   .calendar-wrapper {
-    height: 100%;
     box-sizing: border-box;
     padding: 0 2em;
     flex: 1;
+  }
+  .tags-wrapper {
+    height: 50px;
+    padding: 0 2em;
+    display: flex;
+    align-items: center;
+    .MuiChip-root{
+      margin-right: 10px;
+    }
   }
 }
 

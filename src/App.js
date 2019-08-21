@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 10:03:59
- * @LastEditTime: 2019-08-21 16:32:12
+ * @LastEditTime: 2019-08-21 19:32:13
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -26,11 +26,12 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns'
 import zhCNLocale from 'date-fns/locale/zh-CN'
 import './main.scss'
-import { DialogContentText } from '@material-ui/core'
+import { DialogContentText, Chip } from '@material-ui/core'
 // import LC from './AVStore'
 
 // webpack must be configured to do this
 const CALENDAR_STORE_KEY = 'calendar_event_store'
+const CALENDAR_STORE_TAG_KEY = 'calendar_tags_store'
 const emptyEvent = {
   title: '无标题',
   start: new Date(),
@@ -38,17 +39,29 @@ const emptyEvent = {
   backgroundColor: '#000000',
   borderColor: '#000000',
   textColor: '#ffffff',
-  allDay: true
+  allDay: true,
+  tagId: ''
+}
+
+const emptyTags = {
+  backgroundColor: '#000',
+  color: '#fff',
+  tag: '',
+  id: ''
 }
 
 function App() {
   const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
     ? JSON.parse(localStorage.getItem(CALENDAR_STORE_KEY))
     : []
+  const storeTags = localStorage.getItem(CALENDAR_STORE_TAG_KEY)
+    ? JSON.parse(localStorage.getItem(CALENDAR_STORE_TAG_KEY))
+    : []
   const [event, setEvent] = React.useState(storeEvent)
+  const [tags, setTags] = React.useState(storeTags)
   const [open, setOpen] = React.useState(false)
-  const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [isEdit, setIsEdit] = React.useState(false)
+  const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
 
   let fc = React.useRef()
@@ -56,6 +69,7 @@ function App() {
 
   React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
+    localStorage.setItem(CALENDAR_STORE_TAG_KEY, JSON.stringify(tags))
   })
 
   function handleStartDateChange(date) {
@@ -77,11 +91,21 @@ function App() {
   }
 
   function addEvent() {
+    const eventId = nanoid(8)
+    const tagId = nanoid(8)
     const _currentEvent = {
       ...currentEvent,
-      id: nanoid(8)
+      id: eventId,
+      tagId
     }
     setEvent([...event, _currentEvent])
+    const newTag = {
+      id: tagId,
+      tag: '2222',
+      color: currentEvent.textColor,
+      backgroundColor: currentEvent.backgroundColor
+    }
+    setTags([...tags, newTag])
   }
 
   function handleSaveEvent() {
@@ -100,7 +124,7 @@ function App() {
   }
 
   function handleSave() {
-    html2canvas(document.querySelector('.calendar-wrapper'), {
+    html2canvas(document.querySelector('.main-content-wrapper'), {
       ignoreElements: el => el.className === 'fc-right'
     }).then(function(canvas) {
       downloadFile(generate(), getImgSrc(canvas))
@@ -209,32 +233,54 @@ function App() {
     setEvent([...event, { title, start, end, backgroundColor, borderColor, textColor, id, allDay }])
   }
 
+  function handleDeleteTag(tag) {
+    console.log(tag)
+    const newTags = tags.filter(el => el.id !== tag.id)
+    setTags(newTags)
+  }
+
   return (
     <div className="App">
       <main>
-        <div className="calendar-wrapper" ref={calendarWrapper}>
-          <FullCalendar
-            header={{
-              left: 'title',
-              center: '',
-              right: ' prev today next'
-            }}
-            height="parent"
-            ref={fc}
-            events={event}
-            eventClick={handleEventClick}
-            selectable
-            eventStartEditable
-            droppable
-            editable
-            dateClick={handleDateClick}
-            select={handleSelect}
-            locale={zhCnLocale}
-            theme="cosmo"
-            defaultView="dayGridMonth"
-            plugins={[dayGridPlugin, interactionPlugin]}
-            eventDrop={handleEventDrop}
-          />
+        <div className="main-content-wrapper">
+          <div className="calendar-wrapper" ref={calendarWrapper}>
+            <FullCalendar
+              header={{
+                left: 'title',
+                center: '',
+                right: ' prev today next'
+              }}
+              height="parent"
+              ref={fc}
+              events={event}
+              eventClick={handleEventClick}
+              selectable
+              eventStartEditable
+              droppable
+              editable
+              dateClick={handleDateClick}
+              select={handleSelect}
+              locale={zhCnLocale}
+              theme="cosmo"
+              defaultView="dayGridMonth"
+              plugins={[dayGridPlugin, interactionPlugin]}
+              eventDrop={handleEventDrop}
+            />
+          </div>
+          <div className="tags-wrapper">
+            {tags.map(el => (
+              <Chip
+                key={el.id}
+                label={el.tag}
+                onDelete={handleDeleteTag.bind(null, el)}
+                color="primary"
+                style={{
+                  backgroundColor: el.backgroundColor,
+                  color: el.color
+                }}
+              />
+            ))}
+          </div>
         </div>
         <div className="side-bar">
           <Button onClick={handleSave} variant="contained" color="primary" fullWidth>
@@ -306,7 +352,7 @@ function App() {
               onChange={handleBgColorChange}
             />
           </div>
-          <div className="tag-wrapper" />
+          {/* <div className="tag-wrapper" /> */}
         </DialogContent>
         <DialogActions>
           {currentEvent.id && (
