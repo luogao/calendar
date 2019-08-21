@@ -70,6 +70,9 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    button {
+      margin-bottom: .2em;
+    }
   }
   .calendar-wrapper {
     height: 100%;

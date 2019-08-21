@@ -5740,9 +5740,10 @@ leancloud-realtime@^5.0.0-alpha.3:
     uuid "^3.0.0"
     ws "^5.2.1"
 
-leancloud-storage@^3.14.1:
-  version "3.14.1"
-  resolved "https://registry.npmjs.org/leancloud-storage/-/leancloud-storage-3.14.1.tgz#127520b69afdcd03e60b4454da6e7b925d651012"
+leancloud-storage@^3.15.0:
+  version "3.15.0"
+  resolved "http://192.168.60.82:4873/leancloud-storage/-/leancloud-storage-3.15.0.tgz#6d3b010a313189985bb69ab08c75c7ad74bd1788"
+  integrity sha512-UbR6pLA0tVYPcY7AND0pey45iFsB2PkIo8Wz0DZ9BabKyqndA1ey2LKzYpFDGNh3ODrmT3fValVn9yY4bgf9Uw==
   dependencies:
     debug "^3.1.0"
     es6-promise "4.2.3"

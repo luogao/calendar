@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-08-21 10:03:59
+ * @LastEditTime: 2019-08-21 16:32:12
+ * @LastEditors: Please set LastEditors
+ */
 import React from 'react'
 import './App.css'
 import html2canvas from 'html2canvas'
@@ -19,7 +26,8 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns'
 import zhCNLocale from 'date-fns/locale/zh-CN'
 import './main.scss'
-import LC from './AVStore'
+import { DialogContentText } from '@material-ui/core'
+// import LC from './AVStore'
 
 // webpack must be configured to do this
 const CALENDAR_STORE_KEY = 'calendar_event_store'
@@ -39,6 +47,7 @@ function App() {
     : []
   const [event, setEvent] = React.useState(storeEvent)
   const [open, setOpen] = React.useState(false)
+  const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [isEdit, setIsEdit] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
 
@@ -83,6 +92,11 @@ function App() {
 
   function handleClose() {
     setOpen(false)
+  }
+
+  function handleDeleteAll() {
+    setEvent([])
+    handleDeleteConfirmClose()
   }
 
   function handleSave() {
@@ -180,6 +194,14 @@ function App() {
     })
   }
 
+  function handleDeleteConfirmClose() {
+    setDleteConfirmDialogOpen(false)
+  }
+
+  function handleDeleteAllPress() {
+    setDleteConfirmDialogOpen(true)
+  }
+
   function handleEventDrop(e) {
     const { title, start, end, backgroundColor, borderColor, textColor, id, allDay } = e.event
     const targetIndex = event.findIndex(e => e.id === id)
@@ -217,6 +239,9 @@ function App() {
         <div className="side-bar">
           <Button onClick={handleSave} variant="contained" color="primary" fullWidth>
             保存
+          </Button>
+          <Button onClick={handleDeleteAllPress} variant="contained" color="secondary" fullWidth>
+            删除全部
           </Button>
         </div>
       </main>
@@ -281,6 +306,7 @@ function App() {
               onChange={handleBgColorChange}
             />
           </div>
+          <div className="tag-wrapper" />
         </DialogContent>
         <DialogActions>
           {currentEvent.id && (
@@ -293,6 +319,27 @@ function App() {
           </Button>
           <Button onClick={handleSaveEvent} color="primary">
             保存
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={deleteConfirmDialogOpen}
+        onClose={handleDeleteConfirmClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">注意</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            此举很危险, 请确认是否继续!
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteConfirmClose} color="primary">
+            取消
+          </Button>
+          <Button onClick={handleDeleteAll} color="default" autoFocus>
+            确认
           </Button>
         </DialogActions>
       </Dialog>
