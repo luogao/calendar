@@ -32,12 +32,12 @@ const emptyEvent = {
   tagId: ''
 }
 
-// const emptyTags = {
-//   backgroundColor: '#000',
-//   color: '#fff',
-//   tag: '',
-//   id: ''
-// }
+const emptyTags = {
+  backgroundColor: '#000000',
+  textColor: '#ffffff',
+  title: '',
+  id: ''
+}
 
 function App() {
   const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
@@ -47,13 +47,15 @@ function App() {
     ? JSON.parse(localStorage.getItem(CALENDAR_STORE_TAG_KEY))
     : []
 
-  console.log(storeTags)
   const [event, setEvent] = React.useState(storeEvent)
   const [tags, setTags] = React.useState(storeTags)
   const [eventModalOpen, setEventModalOpen] = React.useState(false)
+  const [tagModalOpen, setTagModalOpen] = React.useState(false)
   const [isEdit, setIsEdit] = React.useState(false)
+  const [tagIsEdit, setTagIsEdit] = React.useState(false)
   const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
+  const [currentTag, setCurrentTag] = React.useState(emptyTags)
 
   let fc = React.useRef()
   let calendarWrapper = React.useRef()
@@ -233,9 +235,36 @@ function App() {
 
   function handleEditTag(tag) {
     console.log(tag)
+    setTagIsEdit(true)
   }
 
-  function handleAddTag() {}
+  function handleAddTag() {
+    setTagModalOpen(true)
+  }
+
+  function closeTagModal() {
+    setTagModalOpen(false)
+  }
+
+  function deleteTag() {
+    closeTagModal()
+  }
+
+  function handleTagTitleChange(e) {
+    setCurrentTag({ ...currentTag, title: e.target.value })
+  }
+
+  function handleTagBgChange(e) {
+    setCurrentTag({ ...currentTag, backgroundColor: e.target.value })
+  }
+
+  function handleTagTextColorChange(e) {
+    setCurrentTag({ ...currentTag, textColor: e.target.value })
+  }
+
+  function handleSaveTag () {
+    
+  }
 
   return (
     <div className="App">
@@ -294,16 +323,16 @@ function App() {
         handleAddTag={handleAddTag}
       />
       <TagEditor
-        modalOpen={true}
-        handleClose={() => {}}
-        isEdit={false}
-        currentTag={{}}
-        handleTitleInput={() => {}}
-        handleTextColorChange={() => {}}
-        handleBgColorChange={() => {}}
-        handleDelete={() => {}}
-        handleCancel={() => {}}
-        handleSave={() => {}}
+        modalOpen={tagModalOpen}
+        handleClose={closeTagModal}
+        isEdit={tagIsEdit}
+        currentTag={currentTag}
+        handleTitleInput={handleTagTitleChange}
+        handleTextColorChange={handleTagTextColorChange}
+        handleBgColorChange={handleTagBgChange}
+        handleDelete={deleteTag}
+        handleCancel={closeTagModal}
+        handleSave={handleSaveTag}
       />
       <Dialog
         open={deleteConfirmDialogOpen}
