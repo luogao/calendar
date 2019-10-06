@@ -1,37 +1,26 @@
-/*
- * @Description: In User Settings Edit
- * @Author: your name
- * @Date: 2019-08-21 10:03:59
- * @LastEditTime: 2019-08-21 19:32:13
- * @LastEditors: Please set LastEditors
- */
 import React from 'react'
 import './App.css'
 import html2canvas from 'html2canvas'
 import nanoid from 'nanoid'
 import 'date-fns'
-// import { ChromePicker } from 'react-color'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import zhCnLocale from '@fullcalendar/core/locales/zh-cn'
 import Button from '@material-ui/core/Button'
-import TextField from '@material-ui/core/TextField'
 import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import Grid from '@material-ui/core/Grid'
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
-import DateFnsUtils from '@date-io/date-fns'
-import zhCNLocale from 'date-fns/locale/zh-CN'
 import './main.scss'
-import { DialogContentText, Chip } from '@material-ui/core'
+import { DialogContentText } from '@material-ui/core'
+import { CALENDAR_STORE_TAG_KEY, CALENDAR_STORE_KEY } from './constants'
+import EventEditor from './components/EventEditor'
+import TagEditor from './components/Tags/components/TagEditor'
+import Tags from './components/Tags'
 // import LC from './AVStore'
 
 // webpack must be configured to do this
-const CALENDAR_STORE_KEY = 'calendar_event_store'
-const CALENDAR_STORE_TAG_KEY = 'calendar_tags_store'
 const emptyEvent = {
   title: '无标题',
   start: new Date(),
@@ -43,12 +32,12 @@ const emptyEvent = {
   tagId: ''
 }
 
-const emptyTags = {
-  backgroundColor: '#000',
-  color: '#fff',
-  tag: '',
-  id: ''
-}
+// const emptyTags = {
+//   backgroundColor: '#000',
+//   color: '#fff',
+//   tag: '',
+//   id: ''
+// }
 
 function App() {
   const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
@@ -57,9 +46,11 @@ function App() {
   const storeTags = localStorage.getItem(CALENDAR_STORE_TAG_KEY)
     ? JSON.parse(localStorage.getItem(CALENDAR_STORE_TAG_KEY))
     : []
+
+  console.log(storeTags)
   const [event, setEvent] = React.useState(storeEvent)
   const [tags, setTags] = React.useState(storeTags)
-  const [open, setOpen] = React.useState(false)
+  const [eventModalOpen, setEventModalOpen] = React.useState(false)
   const [isEdit, setIsEdit] = React.useState(false)
   const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
@@ -81,7 +72,7 @@ function App() {
   }
 
   function handleClickOpen() {
-    setOpen(true)
+    setEventModalOpen(true)
   }
 
   function editEvent() {
@@ -115,7 +106,7 @@ function App() {
   }
 
   function handleClose() {
-    setOpen(false)
+    setEventModalOpen(false)
   }
 
   function handleDeleteAll() {
@@ -193,6 +184,7 @@ function App() {
   function handleDelete() {
     const newEvent = event.filter(e => e.id !== currentEvent.id)
     setEvent([...newEvent])
+    setCurrentEvent(emptyEvent)
     handleClose()
   }
 
@@ -239,6 +231,12 @@ function App() {
     setTags(newTags)
   }
 
+  function handleEditTag(tag) {
+    console.log(tag)
+  }
+
+  function handleAddTag() {}
+
   return (
     <div className="App">
       <main>
@@ -268,18 +266,7 @@ function App() {
             />
           </div>
           <div className="tags-wrapper">
-            {tags.map(el => (
-              <Chip
-                key={el.id}
-                label={el.tag}
-                onDelete={handleDeleteTag.bind(null, el)}
-                color="primary"
-                style={{
-                  backgroundColor: el.backgroundColor,
-                  color: el.color
-                }}
-              />
-            ))}
+            <Tags tags={tags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} />
           </div>
         </div>
         <div className="side-bar">
@@ -291,83 +278,33 @@ function App() {
           </Button>
         </div>
       </main>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="form-dialog-title"
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="form-dialog-title">{isEdit ? '编辑日程' : '新建日程'}</DialogTitle>
-        <DialogContent>
-          <TextField
-            multiline
-            autoFocus
-            margin="dense"
-            label="日程内容"
-            fullWidth
-            placeholder="请输入日程内容"
-            value={currentEvent.title}
-            onInput={handleTitleInput}
-          />
-          <MuiPickersUtilsProvider utils={DateFnsUtils} locale={zhCNLocale}>
-            <Grid container justify="space-between" spacing={3}>
-              <Grid item xs={6}>
-                <KeyboardDatePicker
-                  autoOk
-                  fullWidth
-                  format="yyyy-MM-dd"
-                  margin="dense"
-                  disableToolbar
-                  variant="inline"
-                  label="开始时间"
-                  value={currentEvent.start}
-                  onChange={handleStartDateChange}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <KeyboardDatePicker
-                  autoOk
-                  fullWidth
-                  format="yyyy-MM-dd"
-                  margin="dense"
-                  disableToolbar
-                  variant="inline"
-                  label="结束时间"
-                  value={currentEvent.end}
-                  onChange={handleEndDateChange}
-                />
-              </Grid>
-            </Grid>
-          </MuiPickersUtilsProvider>
-          <div className="color-picker-wrapper">
-            <div className="color-picker-label"> 文字 </div>
-            <input type="color" value={currentEvent.textColor} onChange={handleTextColorChange} />
-          </div>
-          <div className="color-picker-wrapper">
-            <div className="color-picker-label"> 背景 </div>
-            <input
-              type="color"
-              value={currentEvent.backgroundColor}
-              onChange={handleBgColorChange}
-            />
-          </div>
-          {/* <div className="tag-wrapper" /> */}
-        </DialogContent>
-        <DialogActions>
-          {currentEvent.id && (
-            <Button onClick={handleDelete} color="secondary">
-              删除
-            </Button>
-          )}
-          <Button onClick={handleCancel} color="primary">
-            取消
-          </Button>
-          <Button onClick={handleSaveEvent} color="primary">
-            保存
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <EventEditor
+        eventModalOpen={eventModalOpen}
+        handleClose={handleClose}
+        isEdit={isEdit}
+        currentEvent={currentEvent}
+        handleTitleInput={handleTitleInput}
+        handleStartDateChange={handleStartDateChange}
+        handleEndDateChange={handleEndDateChange}
+        handleTextColorChange={handleTextColorChange}
+        handleBgColorChange={handleBgColorChange}
+        handleDelete={handleDelete}
+        handleCancel={handleCancel}
+        handleSaveEvent={handleSaveEvent}
+        handleAddTag={handleAddTag}
+      />
+      <TagEditor
+        modalOpen={true}
+        handleClose={() => {}}
+        isEdit={false}
+        currentTag={{}}
+        handleTitleInput={() => {}}
+        handleTextColorChange={() => {}}
+        handleBgColorChange={() => {}}
+        handleDelete={() => {}}
+        handleCancel={() => {}}
+        handleSave={() => {}}
+      />
       <Dialog
         open={deleteConfirmDialogOpen}
         onClose={handleDeleteConfirmClose}
