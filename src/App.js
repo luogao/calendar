@@ -32,7 +32,7 @@ const emptyEvent = {
   tagId: ''
 }
 
-const emptyTags = {
+const emptyTag = {
   backgroundColor: '#000000',
   textColor: '#ffffff',
   title: '',
@@ -55,7 +55,8 @@ function App() {
   const [tagIsEdit, setTagIsEdit] = React.useState(false)
   const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
-  const [currentTag, setCurrentTag] = React.useState(emptyTags)
+  const [currentTag, setCurrentTag] = React.useState(emptyTag)
+  const [selectedTags, setSelectTags] = React.useState([])
 
   let fc = React.useRef()
   let calendarWrapper = React.useRef()
@@ -228,21 +229,27 @@ function App() {
   }
 
   function handleDeleteTag(tag) {
-    console.log(tag)
     const newTags = tags.filter(el => el.id !== tag.id)
     setTags(newTags)
   }
 
   function handleEditTag(tag) {
-    console.log(tag)
+    console.log({ tag })
+    setCurrentTag(tag)
     setTagIsEdit(true)
+    openTagModal()
   }
 
   function handleAddTag() {
+    openTagModal()
+  }
+
+  function openTagModal() {
     setTagModalOpen(true)
   }
 
   function closeTagModal() {
+    setCurrentTag(emptyTag)
     setTagModalOpen(false)
   }
 
@@ -262,8 +269,27 @@ function App() {
     setCurrentTag({ ...currentTag, textColor: e.target.value })
   }
 
-  function handleSaveTag () {
-    
+  function createTag() {
+    setTags([...tags, { ...currentTag, id: nanoid(8) }])
+  }
+
+  function updateTag() {
+    const targetIndex = tags.findIndex(el => el.id === currentTag.id)
+    tags[targetIndex] = currentTag
+    setTags([...tags])
+  }
+
+  function handleSaveTag() {
+    if (currentTag.id) {
+      updateTag()
+    } else {
+      createTag()
+    }
+    closeTagModal()
+  }
+
+  function handleTagChange(e) {
+    console.log(e)
   }
 
   return (
@@ -295,7 +321,11 @@ function App() {
             />
           </div>
           <div className="tags-wrapper">
-            <Tags tags={tags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} />
+            <Tags
+              tags={selectedTags}
+              handleDeleteTag={handleDeleteTag}
+              handleEditTag={handleEditTag}
+            />
           </div>
         </div>
         <div className="side-bar">
@@ -311,6 +341,7 @@ function App() {
         eventModalOpen={eventModalOpen}
         handleClose={handleClose}
         isEdit={isEdit}
+        allTags={tags}
         currentEvent={currentEvent}
         handleTitleInput={handleTitleInput}
         handleStartDateChange={handleStartDateChange}
@@ -321,6 +352,9 @@ function App() {
         handleCancel={handleCancel}
         handleSaveEvent={handleSaveEvent}
         handleAddTag={handleAddTag}
+        handleEditTag={handleEditTag}
+        handleDeleteTag={handleDeleteTag}
+        handleTagChange={handleTagChange}
       />
       <TagEditor
         modalOpen={tagModalOpen}

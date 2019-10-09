@@ -7,7 +7,9 @@ import {
   DialogActions,
   Button,
   TextField,
-  IconButton
+  IconButton,
+  Select,
+  MenuItem
 } from '@material-ui/core'
 import DateFnsUtils from '@date-io/date-fns'
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
@@ -33,7 +35,8 @@ export default class EventEditor extends Component {
       allTags,
       handleDeleteTag,
       handleEditTag,
-      handleAddTag
+      handleAddTag,
+      handleTagChange
     } = this.props
     return (
       <Dialog
@@ -99,17 +102,28 @@ export default class EventEditor extends Component {
           </div>
           <div className="color-picker-wrapper">
             <div className="color-picker-label"> 标签 </div>
-            <Tags tags={allTags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} />
-            <IconButton
-              onClick={handleAddTag}
-              aria-label="delete"
-              size="small"
-              style={{
-                margin: '6px 0 7px'
-              }}
-            >
-              <AddIcon />
-            </IconButton>
+            <Select value={currentEvent.tagId} onChange={handleTagChange}>
+              {allTags.map(el => (
+                <MenuItem value={el.id} key={el.id}>{el.title}</MenuItem>
+              ))}
+            </Select>
+            <div className="tags-wrapper">
+              <Tags
+                tags={allTags}
+                handleDeleteTag={handleDeleteTag}
+                handleEditTag={handleEditTag}
+              />
+              <IconButton
+                onClick={handleAddTag}
+                aria-label="delete"
+                size="small"
+                style={{
+                  margin: '6px 0 7px'
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            </div>
           </div>
         </DialogContent>
         <DialogActions>

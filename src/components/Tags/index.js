@@ -9,12 +9,12 @@ class index extends Component {
         <Chip
           onClick={handleEditTag.bind(null, el)}
           key={el.id}
-          label={el.tag}
+          label={el.title}
           onDelete={handleDeleteTag.bind(null, el)}
           color="primary"
           style={{
             backgroundColor: el.backgroundColor,
-            color: el.color
+            color: el.textColor
           }}
         />
       ))

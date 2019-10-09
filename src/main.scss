@@ -90,7 +90,7 @@ main {
     padding: 0 2em;
     display: flex;
     align-items: center;
-    .MuiChip-root{
+    .MuiChip-root {
       margin-right: 10px;
     }
   }
@@ -125,5 +125,14 @@ main {
     top: 2em;
     z-index: 2;
     left: 0;
+  }
+  .tags-wrapper {
+    height: 50px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    .MuiChip-root {
+      margin-right: 10px;
+    }
   }
 }
