@@ -13,10 +13,19 @@ body {
   }
   .fc-day {
     cursor: pointer;
+    &:hover {
+      background: rgba(255, 158, 182, 0.1);
+    }
   }
   .fc-event {
     border-radius: 0;
     padding: 0.5em;
+    transition-duration: 0.2s;
+    transition-property: box-shadow transform;
+    &:hover {
+      transform: translate3d(0, -3px, 0);
+      box-shadow: 0 5px 5px rgba(0, 0, 0, 0.3);
+    }
   }
   .fc-toolbar h2 {
     font-weight: 200;
@@ -131,6 +140,8 @@ main {
     padding: 0;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    padding: 30px 0;
     .MuiChip-root {
       margin-right: 10px;
     }

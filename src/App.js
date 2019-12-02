@@ -40,12 +40,8 @@ const emptyTag = {
 }
 
 function App() {
-  const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
-    ? JSON.parse(localStorage.getItem(CALENDAR_STORE_KEY))
-    : []
-  const storeTags = localStorage.getItem(CALENDAR_STORE_TAG_KEY)
-    ? JSON.parse(localStorage.getItem(CALENDAR_STORE_TAG_KEY))
-    : []
+  const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY) ? JSON.parse(localStorage.getItem(CALENDAR_STORE_KEY)) : []
+  const storeTags = localStorage.getItem(CALENDAR_STORE_TAG_KEY) ? JSON.parse(localStorage.getItem(CALENDAR_STORE_TAG_KEY)) : []
 
   const [event, setEvent] = React.useState(storeEvent)
   const [tags, setTags] = React.useState(storeTags)
@@ -56,10 +52,18 @@ function App() {
   const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
   const [currentTag, setCurrentTag] = React.useState(emptyTag)
-  const [selectedTags, setSelectTags] = React.useState([])
+  const [selectedTags, setSelectTags] = React.useState(getSelectedTags())
+  const [selectedTag, setSelectTag] = React.useState('')
 
   let fc = React.useRef()
   let calendarWrapper = React.useRef()
+
+  function getSelectedTags() {
+    const selectedTagIds = event.filter(el => el.tagId).map(el => el.tagId)
+    console.log(event)
+    console.log({ selectedTagIds })
+    return tags.filter(tag => selectedTagIds.includes(tag.id))
+  }
 
   React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
@@ -81,31 +85,25 @@ function App() {
   function editEvent() {
     const targetIndex = event.findIndex(e => e.id === currentEvent.id)
     event.splice(targetIndex, 1)
+    console.log({ currentEvent })
     setEvent([...event, currentEvent])
   }
 
   function addEvent() {
     const eventId = nanoid(8)
-    const tagId = nanoid(8)
     const _currentEvent = {
       ...currentEvent,
-      id: eventId,
-      tagId
+      id: eventId
     }
     setEvent([...event, _currentEvent])
-    const newTag = {
-      id: tagId,
-      tag: '2222',
-      color: currentEvent.textColor,
-      backgroundColor: currentEvent.backgroundColor
-    }
-    setTags([...tags, newTag])
   }
 
   function handleSaveEvent() {
     isEdit ? editEvent() : addEvent()
     handleClose()
     setCurrentEvent(emptyEvent)
+    const selectedTags = getSelectedTags()
+    setSelectTags(selectedTags)
   }
 
   function handleClose() {
@@ -178,8 +176,18 @@ function App() {
 
   function handleEventClick(e) {
     console.log('handleEventClick', e.event)
-    const { title, start, end, backgroundColor, borderColor, textColor, id, allDay } = e.event
-    setCurrentEvent({ title, start, end, backgroundColor, borderColor, textColor, id, allDay })
+    const {
+      title,
+      start,
+      end,
+      backgroundColor,
+      borderColor,
+      textColor,
+      id,
+      allDay,
+      extendedProps: { tagId = null }
+    } = e.event
+    setCurrentEvent({ title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId })
     setIsEdit(true)
     handleClickOpen()
   }
@@ -201,15 +209,15 @@ function App() {
   function handleTextColorChange(e) {
     setCurrentEvent({
       ...currentEvent,
-      textColor: e.target.value
+      textColor: e.hex
     })
   }
 
   function handleBgColorChange(e) {
     setCurrentEvent({
       ...currentEvent,
-      backgroundColor: e.target.value,
-      borderColor: e.target.value
+      backgroundColor: e.hex,
+      borderColor: e.hex
     })
   }
 
@@ -262,11 +270,11 @@ function App() {
   }
 
   function handleTagBgChange(e) {
-    setCurrentTag({ ...currentTag, backgroundColor: e.target.value })
+    setCurrentTag({ ...currentTag, backgroundColor: e.hex })
   }
 
   function handleTagTextColorChange(e) {
-    setCurrentTag({ ...currentTag, textColor: e.target.value })
+    setCurrentTag({ ...currentTag, textColor: e.hex })
   }
 
   function createTag() {
@@ -289,21 +297,28 @@ function App() {
   }
 
   function handleTagChange(e) {
-    console.log(e)
+    console.log(e.target.value)
+    const tag = tags.find(t => t.id === e.target.value)
+    setCurrentEvent({
+      ...currentEvent,
+      backgroundColor: tag.backgroundColor,
+      textColor: tag.textColor,
+      tagId: e.target.value
+    })
   }
 
   return (
-    <div className="App">
+    <div className='App'>
       <main>
-        <div className="main-content-wrapper">
-          <div className="calendar-wrapper" ref={calendarWrapper}>
+        <div className='main-content-wrapper'>
+          <div className='calendar-wrapper' ref={calendarWrapper}>
             <FullCalendar
               header={{
                 left: 'title',
                 center: '',
                 right: ' prev today next'
               }}
-              height="parent"
+              height='parent'
               ref={fc}
               events={event}
               eventClick={handleEventClick}
@@ -314,25 +329,21 @@ function App() {
               dateClick={handleDateClick}
               select={handleSelect}
               locale={zhCnLocale}
-              theme="cosmo"
-              defaultView="dayGridMonth"
+              theme='cosmo'
+              defaultView='dayGridMonth'
               plugins={[dayGridPlugin, interactionPlugin]}
               eventDrop={handleEventDrop}
             />
           </div>
-          <div className="tags-wrapper">
-            <Tags
-              tags={selectedTags}
-              handleDeleteTag={handleDeleteTag}
-              handleEditTag={handleEditTag}
-            />
+          <div className='tags-wrapper'>
+            <Tags tags={selectedTags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} />
           </div>
         </div>
-        <div className="side-bar">
-          <Button onClick={handleSave} variant="contained" color="primary" fullWidth>
+        <div className='side-bar'>
+          <Button onClick={handleSave} variant='contained' color='primary' fullWidth>
             保存
           </Button>
-          <Button onClick={handleDeleteAllPress} variant="contained" color="secondary" fullWidth>
+          <Button onClick={handleDeleteAllPress} variant='contained' color='secondary' fullWidth>
             删除全部
           </Button>
         </div>
@@ -368,23 +379,16 @@ function App() {
         handleCancel={closeTagModal}
         handleSave={handleSaveTag}
       />
-      <Dialog
-        open={deleteConfirmDialogOpen}
-        onClose={handleDeleteConfirmClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">注意</DialogTitle>
+      <Dialog open={deleteConfirmDialogOpen} onClose={handleDeleteConfirmClose} aria-labelledby='alert-dialog-title' aria-describedby='alert-dialog-description'>
+        <DialogTitle id='alert-dialog-title'>注意</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            此举很危险, 请确认是否继续!
-          </DialogContentText>
+          <DialogContentText id='alert-dialog-description'>此举很危险, 请确认是否继续!</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteConfirmClose} color="primary">
+          <Button onClick={handleDeleteConfirmClose} color='primary'>
             取消
           </Button>
-          <Button onClick={handleDeleteAll} color="default" autoFocus>
+          <Button onClick={handleDeleteAll} color='default' autoFocus>
             确认
           </Button>
         </DialogActions>

@@ -1,0 +1,47 @@
+h1 {
+  color: red;
+}
+
+.g-color-picker-wrapper {
+}
+
+.g-color-picker-preview-color {
+  width: 36px;
+  height: 14px;
+  border-radius: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.g-color-picker-preview-color-after {
+  filter: invert(30%);
+  position: absolute;
+  width: 38px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.g-color-picker-swatch {
+  width: 46px;
+  height: 24px;
+  background: #fff;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  cursor: pointer;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+
+.g-color-picker-popover {
+  position: fixed;
+  z-index: 2;
+}
+.g-color-picker-overlay {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
