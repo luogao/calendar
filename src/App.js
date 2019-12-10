@@ -52,17 +52,16 @@ function App() {
   const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState(false)
   const [currentEvent, setCurrentEvent] = React.useState(emptyEvent)
   const [currentTag, setCurrentTag] = React.useState(emptyTag)
-  const [selectedTags, setSelectTags] = React.useState(getSelectedTags())
+  const [selectedTags, setSelectedTags] = React.useState(getSelectedTags())
   const [selectedTag, setSelectTag] = React.useState('')
 
   let fc = React.useRef()
   let calendarWrapper = React.useRef()
 
   function getSelectedTags() {
-    const selectedTagIds = event.filter(el => el.tagId).map(el => el.tagId)
-    console.log(event)
-    console.log({ selectedTagIds })
-    return tags.filter(tag => selectedTagIds.includes(tag.id))
+    const eventTags = event.filter(el => el.tagId).map(el => el.tagId)
+    console.log({ eventTags })
+    return tags.filter(tag => eventTags.includes(tag.id))
   }
 
   React.useEffect(() => {
@@ -102,8 +101,7 @@ function App() {
     isEdit ? editEvent() : addEvent()
     handleClose()
     setCurrentEvent(emptyEvent)
-    const selectedTags = getSelectedTags()
-    setSelectTags(selectedTags)
+    setSelectedTags(getSelectedTags())
   }
 
   function handleClose() {
@@ -185,7 +183,7 @@ function App() {
       textColor,
       id,
       allDay,
-      extendedProps: { tagId = null }
+      extendedProps: { tagId = '' }
     } = e.event
     setCurrentEvent({ title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId })
     setIsEdit(true)
@@ -297,14 +295,15 @@ function App() {
   }
 
   function handleTagChange(e) {
-    console.log(e.target.value)
-    const tag = tags.find(t => t.id === e.target.value)
-    setCurrentEvent({
-      ...currentEvent,
-      backgroundColor: tag.backgroundColor,
-      textColor: tag.textColor,
-      tagId: e.target.value
-    })
+    if (e.target.value) {
+      const tag = tags.find(t => t.id === e.target.value)
+      setCurrentEvent({
+        ...currentEvent,
+        backgroundColor: tag.backgroundColor,
+        textColor: tag.textColor,
+        tagId: e.target.value
+      })
+    }
   }
 
   return (
@@ -336,7 +335,7 @@ function App() {
             />
           </div>
           <div className='tags-wrapper'>
-            <Tags tags={selectedTags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} />
+            <Tags tags={selectedTags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} canDelete={false} />
           </div>
         </div>
         <div className='side-bar'>

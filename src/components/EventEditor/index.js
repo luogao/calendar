@@ -28,6 +28,7 @@ export default class EventEditor extends Component {
       handleAddTag,
       handleTagChange
     } = this.props
+    console.log({ currentEvent })
     return (
       <Dialog open={eventModalOpen} onClose={handleClose} aria-labelledby='form-dialog-title' maxWidth='sm' fullWidth>
         <DialogTitle id='form-dialog-title'>{isEdit ? '编辑日程' : '新建日程'}</DialogTitle>
@@ -53,7 +54,10 @@ export default class EventEditor extends Component {
           </div>
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 标签 </div>
-            <Select value={currentEvent.tagId} onChange={handleTagChange} displayEmpty>
+            <Select value={currentEvent.tagId} onChange={handleTagChange}>
+              <MenuItem value=''>
+                <em>无</em>
+              </MenuItem>
               {allTags.map(el => (
                 <MenuItem value={el.id} key={el.id}>
                   {el.title}
