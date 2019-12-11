@@ -39,11 +39,14 @@ const emptyTag = {
   id: ''
 }
 
+let currentViewEvents = []
+
 function App() {
   const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY) ? JSON.parse(localStorage.getItem(CALENDAR_STORE_KEY)) : []
   const storeTags = localStorage.getItem(CALENDAR_STORE_TAG_KEY) ? JSON.parse(localStorage.getItem(CALENDAR_STORE_TAG_KEY)) : []
 
   const [event, setEvent] = React.useState(storeEvent)
+  // const [currentViewEvents, setCurrentViewEvents] = React.useState([])
   const [tags, setTags] = React.useState(storeTags)
   const [eventModalOpen, setEventModalOpen] = React.useState(false)
   const [tagModalOpen, setTagModalOpen] = React.useState(false)
@@ -57,17 +60,33 @@ function App() {
 
   let fc = React.useRef()
   let calendarWrapper = React.useRef()
+  function getTimestampByDate(date) {
+    return new Date(date).getTime()
+  }
 
   function getSelectedTags() {
-    const eventTags = event.filter(el => el.tagId).map(el => el.tagId)
-    console.log({ eventTags })
-    return tags.filter(tag => eventTags.includes(tag.id))
+    const eventTags = currentViewEvents.filter(el => el.tagId).map(el => el.tagId)
+    const selectedTags = tags.filter(tag => eventTags.includes(tag.id))
+    return selectedTags
   }
 
   React.useEffect(() => {
-    localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
+    console.log('empty depen')
+    console.log(fc)
+  }, [])
+
+  React.useEffect(() => {
+    console.log('setSelectedTags')
+    setSelectedTags(getSelectedTags())
+  }, [event, tags])
+
+  React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_TAG_KEY, JSON.stringify(tags))
-  })
+  }, [tags])
+
+  React.useEffect(() => {
+    localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
+  }, [event])
 
   function handleStartDateChange(date) {
     setCurrentEvent({ ...currentEvent, start: date })
@@ -101,7 +120,6 @@ function App() {
     isEdit ? editEvent() : addEvent()
     handleClose()
     setCurrentEvent(emptyEvent)
-    setSelectedTags(getSelectedTags())
   }
 
   function handleClose() {
@@ -114,8 +132,8 @@ function App() {
   }
 
   function handleSave() {
-    html2canvas(document.querySelector('.main-content-wrapper'), {
-      ignoreElements: el => el.className === 'fc-right'
+    html2canvas(document.querySelector('main'), {
+      ignoreElements: el => el.className === 'fc-right' || el.className === 'MuiButtonBase-root'
     }).then(function(canvas) {
       downloadFile(generate(), getImgSrc(canvas))
     })
@@ -228,10 +246,21 @@ function App() {
   }
 
   function handleEventDrop(e) {
-    const { title, start, end, backgroundColor, borderColor, textColor, id, allDay } = e.event
+    const {
+      title,
+      start,
+      end,
+      backgroundColor,
+      borderColor,
+      textColor,
+      id,
+      allDay,
+      extendedProps: { tagId = '' }
+    } = e.event
+    console.log(' e.event', e.event)
     const targetIndex = event.findIndex(e => e.id === id)
     event.splice(targetIndex, 1)
-    setEvent([...event, { title, start, end, backgroundColor, borderColor, textColor, id, allDay }])
+    setEvent([...event, { title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId }])
   }
 
   function handleDeleteTag(tag) {
@@ -299,11 +328,20 @@ function App() {
       const tag = tags.find(t => t.id === e.target.value)
       setCurrentEvent({
         ...currentEvent,
+        borderColor: tag.backgroundColor,
         backgroundColor: tag.backgroundColor,
         textColor: tag.textColor,
         tagId: e.target.value
       })
     }
+  }
+
+  function handleDateRender({ view, el }) {
+    const { activeEnd, activeStart } = view
+    currentViewEvents = event.filter(e => {
+      return getTimestampByDate(e.start) > getTimestampByDate(activeStart) && getTimestampByDate(e.end) < getTimestampByDate(activeEnd)
+    })
+    console.log({ currentViewEvents })
   }
 
   return (
@@ -332,13 +370,14 @@ function App() {
               defaultView='dayGridMonth'
               plugins={[dayGridPlugin, interactionPlugin]}
               eventDrop={handleEventDrop}
+              datesRender={handleDateRender}
             />
-          </div>
-          <div className='tags-wrapper'>
-            <Tags tags={selectedTags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} canDelete={false} />
           </div>
         </div>
         <div className='side-bar'>
+          <div className='tags-wrapper'>
+            <Tags tags={selectedTags} handleDeleteTag={handleDeleteTag} handleEditTag={handleEditTag} canDelete={false} />
+          </div>
           <Button onClick={handleSave} variant='contained' color='primary' fullWidth>
             保存
           </Button>

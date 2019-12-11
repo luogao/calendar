@@ -79,6 +79,18 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    .tags-wrapper {
+      display: flex;
+      height: 100%;
+      flex: 1;
+      padding: 2.4em 0 0 0;
+      align-items: flex-start;
+      flex-direction: column;
+      .MuiChip-root {
+        margin-right: 0px;
+        margin-top: 1em;
+      }
+    }
     button {
       margin-bottom: 0.2em;
     }
