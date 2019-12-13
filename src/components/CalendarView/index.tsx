@@ -4,51 +4,105 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import zhCnLocale from '@fullcalendar/core/locales/zh-cn'
-import PropTypes from 'prop-types'
-class CalendarView extends Component {
-  render() {
+import { EventType } from '../../types'
+import { View, Duration, EventApi } from '@fullcalendar/core'
+
+export interface CalendarEventSelectArgType {
+  start: Date;
+  end: Date;
+  startStr: string;
+  endStr: string;
+  allDay: boolean;
+  resource?: any;
+  jsEvent: MouseEvent;
+  view: View;
+}
+
+export interface CalendarEventClickArgType {
+  el: HTMLElement;
+  event: EventApi;
+  jsEvent: MouseEvent;
+  view: View;
+}
+
+export interface CalendarDateClickArgType {
+  date: Date;
+  dateStr: string;
+  allDay: boolean;
+  resource?: any;
+  dayEl: HTMLElement;
+  jsEvent: MouseEvent;
+  view: View;
+}
+
+
+export interface CalendarEventDropArgType {
+  el: HTMLElement;
+  event: EventApi;
+  oldEvent: EventApi;
+  delta: Duration;
+  revert: () => void;
+  jsEvent: Event;
+  view: View;
+}
+
+
+
+export interface CalendarDatesRenderArgType {
+  view: View;
+  el: HTMLElement;
+}
+interface CalendarViewProps {
+  fcRef: any;
+  event: EventType[] | [];
+  handleEventClick: (arg: CalendarEventClickArgType) => boolean | void;
+
+  handleDateClick: (arg: CalendarDateClickArgType) => void;
+
+  handleSelect: (arg: CalendarEventSelectArgType) => void;
+
+  handleEventDrop: (arg: CalendarEventDropArgType) => void;
+
+  handleDateRender: (arg: CalendarDatesRenderArgType) => void;
+
+}
+
+class CalendarView extends Component<CalendarViewProps> {
+  render () {
     console.log('CalendarView render')
     const { fcRef, event, handleEventClick, handleDateClick, handleSelect, handleEventDrop, handleDateRender } = this.props
     return (
       <FullCalendar
-        header={{
+        header={ {
           left: 'title',
           center: '',
           right: ' prev today next'
-        }}
+        } }
         height='parent'
-        ref={fcRef}
-        events={event}
-        eventClick={handleEventClick}
+        ref={ fcRef }
+        events={ event }
+        eventClick={ handleEventClick }
         selectable
         eventStartEditable
         droppable
         editable
-        dateClick={handleDateClick}
-        select={handleSelect}
-        locale={zhCnLocale}
-        theme='cosmo'
+        // themeSystem="cosmo"
+        theme="cosmo"
+        dateClick={ handleDateClick }
+        select={ handleSelect }
+        locale={ zhCnLocale }
         defaultView='dayGridMonth'
-        plugins={[dayGridPlugin, interactionPlugin]}
-        eventDrop={handleEventDrop}
-        datesRender={handleDateRender}
+        plugins={ [ dayGridPlugin, interactionPlugin ] }
+        eventDrop={ handleEventDrop }
+        datesRender={ handleDateRender }
       />
     )
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate (nextProps: CalendarViewProps) {
     return _.isEqual(nextProps.event, this.props.event)
   }
 }
 
-CalendarView.propTypes = {
-  fcRef: PropTypes.object.isRequired,
-  event: PropTypes.array.isRequired,
-  handleEventClick: PropTypes.func.isRequired,
-  handleDateClick: PropTypes.func.isRequired,
-  handleSelect: PropTypes.func.isRequired,
-  handleEventDrop: PropTypes.func.isRequired,
-  handleDateRender: PropTypes.func.isRequired
-}
 
 export default CalendarView

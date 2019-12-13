@@ -1,4 +1,4 @@
-import React, { useReducer, ReducerAction } from 'react'
+import React, { useReducer } from 'react'
 import './App.css'
 import './main.scss'
 import html2canvas from 'html2canvas'
@@ -14,20 +14,19 @@ import { CALENDAR_STORE_TAG_KEY, CALENDAR_STORE_KEY } from './constants'
 import EventEditor from './components/EventEditor'
 import TagEditor from './components/Tags/components/TagEditor'
 import Tags from './components/Tags'
-import CalendarView from './components/CalendarView'
+import CalendarView, { CalendarEventSelectArgType, CalendarDateClickArgType, CalendarEventClickArgType } from './components/CalendarView'
+import FullCalendar from '@fullcalendar/react'
+import { EventType, EventAction, StateType, TagType } from './types'
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 
 
-
-interface StateType {
-  event: any[]
-  currentViewEvents: any[]
-}
 
 // import LC from './AVStore'
 const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
 const storeTags = localStorage.getItem(CALENDAR_STORE_TAG_KEY)
 // webpack must be configured to do this
 const emptyEvent = {
+  id: '',
   title: '无标题',
   start: new Date(),
   end: new Date(),
@@ -45,7 +44,7 @@ const emptyTag = {
   id: ''
 }
 
-const eventReducer = (state: StateType, action: ReducerAction) => {
+const eventReducer = (state: StateType, action: EventAction) => {
   switch (action.type) {
     case 'setEvent':
       return {
@@ -70,23 +69,22 @@ const initialState: StateType = {
 
 function App () {
   const [ state, dispatch ] = useReducer(eventReducer, initialState)
-  console.log({ state })
-  const [ event, setEvent ] = React.useState(storeEvent ? JSON.parse(storeEvent) : [])
-  const [ currentViewEvents, setCurrentViewEvents ] = React.useState([])
-  const [ tags, setTags ] = React.useState(storeTags ? JSON.parse(storeTags) : [])
-  const [ eventModalOpen, setEventModalOpen ] = React.useState(false)
-  const [ tagModalOpen, setTagModalOpen ] = React.useState(false)
-  const [ isEdit, setIsEdit ] = React.useState(false)
-  const [ tagIsEdit, setTagIsEdit ] = React.useState(false)
-  const [ deleteConfirmDialogOpen, setDleteConfirmDialogOpen ] = React.useState(false)
-  const [ currentEvent, setCurrentEvent ] = React.useState(emptyEvent)
-  const [ currentTag, setCurrentTag ] = React.useState(emptyTag)
-  const [ selectedTags, setSelectedTags ] = React.useState(getSelectedTags())
+  const [ event, setEvent ] = React.useState<EventType[] | []>(storeEvent ? JSON.parse(storeEvent) : [])
+  const [ currentViewEvents, setCurrentViewEvents ] = React.useState<EventType[] | []>([])
+  const [ tags, setTags ] = React.useState<TagType[] | []>(storeTags ? JSON.parse(storeTags) : [])
+  const [ eventModalOpen, setEventModalOpen ] = React.useState<boolean>(false)
+  const [ tagModalOpen, setTagModalOpen ] = React.useState<boolean>(false)
+  const [ isEdit, setIsEdit ] = React.useState<boolean>(false)
+  const [ tagIsEdit, setTagIsEdit ] = React.useState<boolean>(false)
+  const [ deleteConfirmDialogOpen, setDleteConfirmDialogOpen ] = React.useState<boolean>(false)
+  const [ currentEvent, setCurrentEvent ] = React.useState<EventType>(emptyEvent)
+  const [ currentTag, setCurrentTag ] = React.useState<TagType>(emptyTag)
+  const [ selectedTags, setSelectedTags ] = React.useState<TagType[] | []>(getSelectedTags())
   const [ selectedTag, setSelectTag ] = React.useState('')
 
-  let fc = React.useRef()
-  let calendarWrapper = React.useRef()
-  function getTimestampByDate (date) {
+  let fc = React.useRef<FullCalendar>(null)
+  let calendarWrapper = React.useRef<HTMLDivElement>(null)
+  function getTimestampByDate (date: Date) {
     return new Date(date).getTime()
   }
 
@@ -97,7 +95,7 @@ function App () {
   }
 
   React.useEffect(() => {
-    console.log(fc.current.calendar.view)
+    // fc && console.log(fc.current.calendar.view)
     console.log('empty depen')
   }, [])
 
@@ -113,11 +111,11 @@ function App () {
     localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
   }, [ event ])
 
-  function handleStartDateChange (date) {
+  function handleStartDateChange (date: MaterialUiPickersDate) {
     setCurrentEvent({ ...currentEvent, start: date })
   }
 
-  function handleEndDateChange (date) {
+  function handleEndDateChange (date: MaterialUiPickersDate) {
     setCurrentEvent({ ...currentEvent, end: date })
   }
 
@@ -128,7 +126,8 @@ function App () {
   function editEvent () {
     const targetIndex = event.findIndex(e => e.id === currentEvent.id)
     event.splice(targetIndex, 1)
-    setEvent([ ...event, currentEvent ])
+    const _event = [ ...event, currentEvent ]
+    setEvent(_event)
   }
 
   function addEvent () {
@@ -156,19 +155,22 @@ function App () {
   }
 
   function handleSave () {
-    html2canvas(document.querySelector('main'), {
-      ignoreElements: el => el.className === 'fc-right' || el.className === 'action-btns'
-    }).then(function (canvas) {
-      downloadFile(generate(), getImgSrc(canvas))
-    })
+    const mainTarget = document.querySelector('main')
+    if (mainTarget) {
+      html2canvas(mainTarget, {
+        ignoreElements: el => el.className === 'fc-right' || el.className === 'action-btns'
+      }).then(function (canvas: HTMLCanvasElement) {
+        downloadFile(generate(), getImgSrc(canvas))
+      })
+    }
   }
 
-  function getImgSrc (canvas) {
+  function getImgSrc (canvas: HTMLCanvasElement) {
     const dataUrl = canvas.toDataURL('image/png')
     return dataUrl
   }
 
-  function base64Img2Blob (code) {
+  function base64Img2Blob (code: string) {
     var parts = code.split(';base64,')
     var contentType = parts[ 0 ].split(':')[ 1 ]
     var raw = window.atob(parts[ 1 ])
@@ -189,7 +191,7 @@ function App () {
     return `${ prefix }-${ id }`
   }
 
-  function downloadFile (fileName, content) {
+  function downloadFile (fileName: string, content: string) {
     var aLink = document.createElement('a')
     var blob = base64Img2Blob(content) //new Blob([content]);
     aLink.download = fileName
@@ -202,7 +204,7 @@ function App () {
     handleClose()
   }
 
-  function handleSelect (e) {
+  function handleSelect (e: CalendarEventSelectArgType) {
     console.log('handleSelect', e)
     const { end, start } = e
     setIsEdit(false)
@@ -210,11 +212,11 @@ function App () {
     handleClickOpen()
   }
 
-  function handleDateClick (e) {
+  function handleDateClick (e: CalendarDateClickArgType) {
     // console.log('handleDateClick', e)
   }
 
-  function handleEventClick (e) {
+  function handleEventClick (e: CalendarEventClickArgType) {
     console.log('handleEventClick', e.event)
     const {
       title,
@@ -226,7 +228,7 @@ function App () {
       id,
       allDay,
       extendedProps: { tagId = '' }
-    } = e.event
+    } = e.event as any
     setCurrentEvent({ title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId })
     setIsEdit(true)
     handleClickOpen()
@@ -239,7 +241,7 @@ function App () {
     handleClose()
   }
 
-  function handleTitleInput (e) {
+  function handleTitleInput (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     setCurrentEvent({
       ...currentEvent,
       title: e.target.value
@@ -349,13 +351,15 @@ function App () {
   function handleTagChange (e) {
     if (e.target.value) {
       const tag = tags.find(t => t.id === e.target.value)
-      setCurrentEvent({
-        ...currentEvent,
-        borderColor: tag.backgroundColor,
-        backgroundColor: tag.backgroundColor,
-        textColor: tag.textColor,
-        tagId: e.target.value
-      })
+      if (tag) {
+        setCurrentEvent({
+          ...currentEvent,
+          borderColor: tag.backgroundColor,
+          backgroundColor: tag.backgroundColor,
+          textColor: tag.textColor,
+          tagId: e.target.value
+        })
+      }
     }
   }
 
