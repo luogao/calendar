@@ -14,12 +14,15 @@ import { CALENDAR_STORE_TAG_KEY, CALENDAR_STORE_KEY } from './constants'
 import EventEditor from './components/EventEditor'
 import TagEditor from './components/Tags/components/TagEditor'
 import Tags from './components/Tags'
-import CalendarView, { CalendarEventSelectArgType, CalendarDateClickArgType, CalendarEventClickArgType } from './components/CalendarView'
+import CalendarView, {
+  CalendarEventSelectArgType,
+  CalendarDateClickArgType,
+  CalendarEventClickArgType
+} from './components/CalendarView'
 import FullCalendar from '@fullcalendar/react'
 import { EventType, EventAction, StateType, TagType } from './types'
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
-
-
+import { CalendarDatesRenderArgType, CalendarEventDropArgType } from './components/CalendarView'
 
 // import LC from './AVStore'
 const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
@@ -61,34 +64,35 @@ const eventReducer = (state: StateType, action: EventAction) => {
   }
 }
 
-
 const initialState: StateType = {
   event: storeEvent ? JSON.parse(storeEvent) : [],
   currentViewEvents: []
 }
 
-function App () {
-  const [ state, dispatch ] = useReducer(eventReducer, initialState)
-  const [ event, setEvent ] = React.useState<EventType[] | []>(storeEvent ? JSON.parse(storeEvent) : [])
-  const [ currentViewEvents, setCurrentViewEvents ] = React.useState<EventType[] | []>([])
-  const [ tags, setTags ] = React.useState<TagType[] | []>(storeTags ? JSON.parse(storeTags) : [])
-  const [ eventModalOpen, setEventModalOpen ] = React.useState<boolean>(false)
-  const [ tagModalOpen, setTagModalOpen ] = React.useState<boolean>(false)
-  const [ isEdit, setIsEdit ] = React.useState<boolean>(false)
-  const [ tagIsEdit, setTagIsEdit ] = React.useState<boolean>(false)
-  const [ deleteConfirmDialogOpen, setDleteConfirmDialogOpen ] = React.useState<boolean>(false)
-  const [ currentEvent, setCurrentEvent ] = React.useState<EventType>(emptyEvent)
-  const [ currentTag, setCurrentTag ] = React.useState<TagType>(emptyTag)
-  const [ selectedTags, setSelectedTags ] = React.useState<TagType[] | []>(getSelectedTags())
-  const [ selectedTag, setSelectTag ] = React.useState('')
+function App() {
+  const [state, dispatch] = useReducer(eventReducer, initialState)
+  const [event, setEvent] = React.useState<EventType[] | []>(
+    storeEvent ? JSON.parse(storeEvent) : []
+  )
+  const [currentViewEvents, setCurrentViewEvents] = React.useState<EventType[] | []>([])
+  const [tags, setTags] = React.useState<TagType[] | []>(storeTags ? JSON.parse(storeTags) : [])
+  const [eventModalOpen, setEventModalOpen] = React.useState<boolean>(false)
+  const [tagModalOpen, setTagModalOpen] = React.useState<boolean>(false)
+  const [isEdit, setIsEdit] = React.useState<boolean>(false)
+  const [tagIsEdit, setTagIsEdit] = React.useState<boolean>(false)
+  const [deleteConfirmDialogOpen, setDleteConfirmDialogOpen] = React.useState<boolean>(false)
+  const [currentEvent, setCurrentEvent] = React.useState<EventType>(emptyEvent)
+  const [currentTag, setCurrentTag] = React.useState<TagType>(emptyTag)
+  const [selectedTags, setSelectedTags] = React.useState<TagType[] | []>(getSelectedTags())
+  const [selectedTag, setSelectTag] = React.useState('')
 
   let fc = React.useRef<FullCalendar>(null)
   let calendarWrapper = React.useRef<HTMLDivElement>(null)
-  function getTimestampByDate (date: Date) {
+  function getTimestampByDate(date: Date | MaterialUiPickersDate) {
     return new Date(date).getTime()
   }
 
-  function getSelectedTags () {
+  function getSelectedTags() {
     const eventTags = currentViewEvents.filter(el => el.tagId).map(el => el.tagId)
     const selectedTags = tags.filter(tag => eventTags.includes(tag.id))
     return selectedTags
@@ -101,97 +105,97 @@ function App () {
 
   React.useEffect(() => {
     setSelectedTags(getSelectedTags())
-  }, [ event, tags ])
+  }, [event, tags])
 
   React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_TAG_KEY, JSON.stringify(tags))
-  }, [ tags ])
+  }, [tags])
 
   React.useEffect(() => {
     localStorage.setItem(CALENDAR_STORE_KEY, JSON.stringify(event))
-  }, [ event ])
+  }, [event])
 
-  function handleStartDateChange (date: MaterialUiPickersDate) {
+  function handleStartDateChange(date: MaterialUiPickersDate) {
     setCurrentEvent({ ...currentEvent, start: date })
   }
 
-  function handleEndDateChange (date: MaterialUiPickersDate) {
+  function handleEndDateChange(date: MaterialUiPickersDate) {
     setCurrentEvent({ ...currentEvent, end: date })
   }
 
-  function handleClickOpen () {
+  function handleClickOpen() {
     setEventModalOpen(true)
   }
 
-  function editEvent () {
+  function editEvent() {
     const targetIndex = event.findIndex(e => e.id === currentEvent.id)
     event.splice(targetIndex, 1)
-    const _event = [ ...event, currentEvent ]
+    const _event = [...event, currentEvent]
     setEvent(_event)
   }
 
-  function addEvent () {
+  function addEvent() {
     const eventId = nanoid(8)
     const _currentEvent = {
       ...currentEvent,
       id: eventId
     }
-    setEvent([ ...event, _currentEvent ])
+    setEvent([...event, _currentEvent])
   }
 
-  function handleSaveEvent () {
+  function handleSaveEvent() {
     isEdit ? editEvent() : addEvent()
     handleClose()
     setCurrentEvent(emptyEvent)
   }
 
-  function handleClose () {
+  function handleClose() {
     setEventModalOpen(false)
   }
 
-  function handleDeleteAll () {
+  function handleDeleteAll() {
     setEvent([])
     handleDeleteConfirmClose()
   }
 
-  function handleSave () {
+  function handleSave() {
     const mainTarget = document.querySelector('main')
     if (mainTarget) {
       html2canvas(mainTarget, {
         ignoreElements: el => el.className === 'fc-right' || el.className === 'action-btns'
-      }).then(function (canvas: HTMLCanvasElement) {
+      }).then(function(canvas: HTMLCanvasElement) {
         downloadFile(generate(), getImgSrc(canvas))
       })
     }
   }
 
-  function getImgSrc (canvas: HTMLCanvasElement) {
+  function getImgSrc(canvas: HTMLCanvasElement) {
     const dataUrl = canvas.toDataURL('image/png')
     return dataUrl
   }
 
-  function base64Img2Blob (code: string) {
+  function base64Img2Blob(code: string) {
     var parts = code.split(';base64,')
-    var contentType = parts[ 0 ].split(':')[ 1 ]
-    var raw = window.atob(parts[ 1 ])
+    var contentType = parts[0].split(':')[1]
+    var raw = window.atob(parts[1])
     var rawLength = raw.length
 
     var uInt8Array = new Uint8Array(rawLength)
 
     for (var i = 0; i < rawLength; ++i) {
-      uInt8Array[ i ] = raw.charCodeAt(i)
+      uInt8Array[i] = raw.charCodeAt(i)
     }
 
-    return new Blob([ uInt8Array ], { type: contentType })
+    return new Blob([uInt8Array], { type: contentType })
   }
 
-  function generate () {
+  function generate() {
     const prefix = 'calendar'
     const id = nanoid(5)
-    return `${ prefix }-${ id }`
+    return `${prefix}-${id}`
   }
 
-  function downloadFile (fileName: string, content: string) {
+  function downloadFile(fileName: string, content: string) {
     var aLink = document.createElement('a')
     var blob = base64Img2Blob(content) //new Blob([content]);
     aLink.download = fileName
@@ -199,12 +203,12 @@ function App () {
     aLink.click()
   }
 
-  function handleCancel () {
+  function handleCancel() {
     setCurrentEvent(emptyEvent)
     handleClose()
   }
 
-  function handleSelect (e: CalendarEventSelectArgType) {
+  function handleSelect(e: CalendarEventSelectArgType) {
     console.log('handleSelect', e)
     const { end, start } = e
     setIsEdit(false)
@@ -212,11 +216,11 @@ function App () {
     handleClickOpen()
   }
 
-  function handleDateClick (e: CalendarDateClickArgType) {
+  function handleDateClick(e: CalendarDateClickArgType) {
     // console.log('handleDateClick', e)
   }
 
-  function handleEventClick (e: CalendarEventClickArgType) {
+  function handleEventClick(e: CalendarEventClickArgType) {
     console.log('handleEventClick', e.event)
     const {
       title,
@@ -229,33 +233,45 @@ function App () {
       allDay,
       extendedProps: { tagId = '' }
     } = e.event as any
-    setCurrentEvent({ title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId })
+    setCurrentEvent({
+      title,
+      start,
+      end,
+      backgroundColor,
+      borderColor,
+      textColor,
+      id,
+      allDay,
+      tagId
+    })
     setIsEdit(true)
     handleClickOpen()
   }
 
-  function handleDelete () {
+  function handleDelete() {
     const newEvent = event.filter(e => e.id !== currentEvent.id)
-    setEvent([ ...newEvent ])
+    setEvent([...newEvent])
     setCurrentEvent(emptyEvent)
     handleClose()
   }
 
-  function handleTitleInput (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function handleTitleInput(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) {
     setCurrentEvent({
       ...currentEvent,
       title: e.target.value
     })
   }
 
-  function handleTextColorChange (e) {
+  function handleTextColorChange(e) {
     setCurrentEvent({
       ...currentEvent,
       textColor: e.hex
     })
   }
 
-  function handleBgColorChange (e) {
+  function handleBgColorChange(e) {
     setCurrentEvent({
       ...currentEvent,
       backgroundColor: e.hex,
@@ -263,15 +279,15 @@ function App () {
     })
   }
 
-  function handleDeleteConfirmClose () {
+  function handleDeleteConfirmClose() {
     setDleteConfirmDialogOpen(false)
   }
 
-  function handleDeleteAllPress () {
+  function handleDeleteAllPress() {
     setDleteConfirmDialogOpen(true)
   }
 
-  function handleEventDrop (e) {
+  function handleEventDrop(e: CalendarEventDropArgType) {
     const {
       title,
       start,
@@ -285,61 +301,64 @@ function App () {
     } = e.event
     const targetIndex = event.findIndex(e => e.id === id)
     event.splice(targetIndex, 1)
-    setEvent([ ...event, { title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId } ])
+    setEvent([
+      ...event,
+      { title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId }
+    ])
   }
 
-  function handleDeleteTag (tag) {
+  function handleDeleteTag(tag: TagType) {
     const newTags = tags.filter(el => el.id !== tag.id)
     setTags(newTags)
   }
 
-  function handleEditTag (tag) {
+  function handleEditTag(tag: TagType) {
     console.log({ tag })
     setCurrentTag(tag)
     setTagIsEdit(true)
     openTagModal()
   }
 
-  function handleAddTag () {
+  function handleAddTag() {
     openTagModal()
   }
 
-  function openTagModal () {
+  function openTagModal() {
     setTagModalOpen(true)
   }
 
-  function closeTagModal () {
+  function closeTagModal() {
     setCurrentTag(emptyTag)
     setTagModalOpen(false)
   }
 
-  function deleteTag () {
+  function deleteTag() {
     closeTagModal()
   }
 
-  function handleTagTitleChange (e) {
+  function handleTagTitleChange(e) {
     setCurrentTag({ ...currentTag, title: e.target.value })
   }
 
-  function handleTagBgChange (e) {
+  function handleTagBgChange(e) {
     setCurrentTag({ ...currentTag, backgroundColor: e.hex })
   }
 
-  function handleTagTextColorChange (e) {
+  function handleTagTextColorChange(e) {
     setCurrentTag({ ...currentTag, textColor: e.hex })
   }
 
-  function createTag () {
-    setTags([ ...tags, { ...currentTag, id: nanoid(8) } ])
+  function createTag() {
+    setTags([...tags, { ...currentTag, id: nanoid(8) }])
   }
 
-  function updateTag () {
+  function updateTag() {
     const targetIndex = tags.findIndex(el => el.id === currentTag.id)
-    tags[ targetIndex ] = currentTag
-    setTags([ ...tags ])
+    tags[targetIndex] = currentTag
+    setTags([...tags])
   }
 
-  function handleSaveTag () {
+  function handleSaveTag() {
     if (currentTag.id) {
       updateTag()
     } else {
@@ -348,7 +367,13 @@ function App () {
     closeTagModal()
   }
 
-  function handleTagChange (e) {
+  function handleTagChange(
+    e: React.ChangeEvent<{
+      name?: string | undefined
+      value: string
+    }>,
+    child: React.ReactNode
+  ) {
     if (e.target.value) {
       const tag = tags.find(t => t.id === e.target.value)
       if (tag) {
@@ -363,10 +388,13 @@ function App () {
     }
   }
 
-  function handleDateRender ({ view, el }) {
+  function handleDateRender({ view, el }: CalendarDatesRenderArgType) {
     const { activeEnd, activeStart } = view
     const currentViewEvents = event.filter(e => {
-      return getTimestampByDate(e.start) > getTimestampByDate(activeStart) && getTimestampByDate(e.end) < getTimestampByDate(activeEnd)
+      return (
+        getTimestampByDate(e.start) > getTimestampByDate(activeStart) &&
+        getTimestampByDate(e.end) < getTimestampByDate(activeEnd)
+      )
     })
     console.log({ currentViewEvents })
     // setCurrentViewEvents(currentViewEvents)
@@ -377,73 +405,86 @@ function App () {
     <div className='App'>
       <main>
         <div className='main-content-wrapper'>
-          <div className='calendar-wrapper' ref={ calendarWrapper }>
+          <div className='calendar-wrapper' ref={calendarWrapper}>
             <CalendarView
-              event={ state.event }
-              fcRef={ fc }
-              handleEventClick={ handleEventClick }
-              handleDateClick={ handleDateClick }
-              handleSelect={ handleSelect }
-              handleEventDrop={ handleEventDrop }
-              handleDateRender={ handleDateRender }
+              event={state.event}
+              fcRef={fc}
+              handleEventClick={handleEventClick}
+              handleDateClick={handleDateClick}
+              handleSelect={handleSelect}
+              handleEventDrop={handleEventDrop}
+              handleDateRender={handleDateRender}
             />
           </div>
         </div>
         <div className='side-bar'>
           <div className='tags-wrapper'>
-            <Tags tags={ selectedTags } isDisplay handleDeleteTag={ handleDeleteTag } handleEditTag={ handleEditTag } canDelete={ false } />
+            <Tags
+              tags={selectedTags}
+              isDisplay
+              handleDeleteTag={handleDeleteTag}
+              handleEditTag={handleEditTag}
+              canDelete={false}
+            />
           </div>
           <div className='action-btns'>
-            <Button onClick={ handleSave } variant='contained' color='primary' fullWidth>
+            <Button onClick={handleSave} variant='contained' color='primary' fullWidth>
               保存
             </Button>
-            <Button onClick={ handleDeleteAllPress } variant='contained' color='secondary' fullWidth>
+            <Button onClick={handleDeleteAllPress} variant='contained' color='secondary' fullWidth>
               删除全部
             </Button>
           </div>
         </div>
       </main>
       <EventEditor
-        eventModalOpen={ eventModalOpen }
-        handleClose={ handleClose }
-        isEdit={ isEdit }
-        allTags={ tags }
-        currentEvent={ currentEvent }
-        handleTitleInput={ handleTitleInput }
-        handleStartDateChange={ handleStartDateChange }
-        handleEndDateChange={ handleEndDateChange }
-        handleTextColorChange={ handleTextColorChange }
-        handleBgColorChange={ handleBgColorChange }
-        handleDelete={ handleDelete }
-        handleCancel={ handleCancel }
-        handleSaveEvent={ handleSaveEvent }
-        handleAddTag={ handleAddTag }
-        handleEditTag={ handleEditTag }
-        handleDeleteTag={ handleDeleteTag }
-        handleTagChange={ handleTagChange }
+        eventModalOpen={eventModalOpen}
+        handleClose={handleClose}
+        isEdit={isEdit}
+        allTags={tags}
+        currentEvent={currentEvent}
+        handleTitleInput={handleTitleInput}
+        handleStartDateChange={handleStartDateChange}
+        handleEndDateChange={handleEndDateChange}
+        handleTextColorChange={handleTextColorChange}
+        handleBgColorChange={handleBgColorChange}
+        handleDelete={handleDelete}
+        handleCancel={handleCancel}
+        handleSaveEvent={handleSaveEvent}
+        handleAddTag={handleAddTag}
+        handleEditTag={handleEditTag}
+        handleDeleteTag={handleDeleteTag}
+        handleTagChange={handleTagChange}
       />
       <TagEditor
-        modalOpen={ tagModalOpen }
-        handleClose={ closeTagModal }
-        isEdit={ tagIsEdit }
-        currentTag={ currentTag }
-        handleTitleInput={ handleTagTitleChange }
-        handleTextColorChange={ handleTagTextColorChange }
-        handleBgColorChange={ handleTagBgChange }
-        handleDelete={ deleteTag }
-        handleCancel={ closeTagModal }
-        handleSave={ handleSaveTag }
+        modalOpen={tagModalOpen}
+        handleClose={closeTagModal}
+        isEdit={tagIsEdit}
+        currentTag={currentTag}
+        handleTitleInput={handleTagTitleChange}
+        handleTextColorChange={handleTagTextColorChange}
+        handleBgColorChange={handleTagBgChange}
+        handleDelete={deleteTag}
+        handleCancel={closeTagModal}
+        handleSave={handleSaveTag}
       />
-      <Dialog open={ deleteConfirmDialogOpen } onClose={ handleDeleteConfirmClose } aria-labelledby='alert-dialog-title' aria-describedby='alert-dialog-description'>
+      <Dialog
+        open={deleteConfirmDialogOpen}
+        onClose={handleDeleteConfirmClose}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
         <DialogTitle id='alert-dialog-title'>注意</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>此举很危险, 请确认是否继续!</DialogContentText>
+          <DialogContentText id='alert-dialog-description'>
+            此举很危险, 请确认是否继续!
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={ handleDeleteConfirmClose } color='primary'>
+          <Button onClick={handleDeleteConfirmClose} color='primary'>
             取消
           </Button>
-          <Button onClick={ handleDeleteAll } color='default' autoFocus>
+          <Button onClick={handleDeleteAll} color='default' autoFocus>
             确认
           </Button>
         </DialogActions>

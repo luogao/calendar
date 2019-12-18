@@ -8,101 +8,105 @@ import { EventType } from '../../types'
 import { View, Duration, EventApi } from '@fullcalendar/core'
 
 export interface CalendarEventSelectArgType {
-  start: Date;
-  end: Date;
-  startStr: string;
-  endStr: string;
-  allDay: boolean;
-  resource?: any;
-  jsEvent: MouseEvent;
-  view: View;
+  start: Date
+  end: Date
+  startStr: string
+  endStr: string
+  allDay: boolean
+  resource?: any
+  jsEvent: MouseEvent
+  view: View
 }
 
 export interface CalendarEventClickArgType {
-  el: HTMLElement;
-  event: EventApi;
-  jsEvent: MouseEvent;
-  view: View;
+  el: HTMLElement
+  event: EventApi
+  jsEvent: MouseEvent
+  view: View
 }
 
 export interface CalendarDateClickArgType {
-  date: Date;
-  dateStr: string;
-  allDay: boolean;
-  resource?: any;
-  dayEl: HTMLElement;
-  jsEvent: MouseEvent;
-  view: View;
+  date: Date
+  dateStr: string
+  allDay: boolean
+  resource?: any
+  dayEl: HTMLElement
+  jsEvent: MouseEvent
+  view: View
 }
-
 
 export interface CalendarEventDropArgType {
-  el: HTMLElement;
-  event: EventApi;
-  oldEvent: EventApi;
-  delta: Duration;
-  revert: () => void;
-  jsEvent: Event;
-  view: View;
+  el: HTMLElement
+  event: EventApi
+  oldEvent: EventApi
+  delta: Duration
+  revert: () => void
+  jsEvent: Event
+  view: View
 }
-
-
 
 export interface CalendarDatesRenderArgType {
-  view: View;
-  el: HTMLElement;
+  view: View
+  el: HTMLElement
 }
+
 interface CalendarViewProps {
-  fcRef: any;
-  event: EventType[] | [];
-  handleEventClick: (arg: CalendarEventClickArgType) => boolean | void;
+  fcRef: any
+  event: EventType[] | []
+  handleEventClick: (arg: CalendarEventClickArgType) => boolean | void
 
-  handleDateClick: (arg: CalendarDateClickArgType) => void;
+  handleDateClick: (arg: CalendarDateClickArgType) => void
 
-  handleSelect: (arg: CalendarEventSelectArgType) => void;
+  handleSelect: (arg: CalendarEventSelectArgType) => void
 
-  handleEventDrop: (arg: CalendarEventDropArgType) => void;
+  handleEventDrop: (arg: CalendarEventDropArgType) => void
 
-  handleDateRender: (arg: CalendarDatesRenderArgType) => void;
-
+  handleDateRender: (arg: CalendarDatesRenderArgType) => void
 }
 
 class CalendarView extends Component<CalendarViewProps> {
-  render () {
+  render() {
     console.log('CalendarView render')
-    const { fcRef, event, handleEventClick, handleDateClick, handleSelect, handleEventDrop, handleDateRender } = this.props
+    const {
+      fcRef,
+      event,
+      handleEventClick,
+      handleDateClick,
+      handleSelect,
+      handleEventDrop,
+      handleDateRender
+    } = this.props
     return (
       <FullCalendar
-        header={ {
+        header={{
           left: 'title',
           center: '',
           right: ' prev today next'
-        } }
+        }}
         height='parent'
-        ref={ fcRef }
-        events={ event }
-        eventClick={ handleEventClick }
+        ref={fcRef}
+        events={event}
+        eventClick={handleEventClick}
         selectable
         eventStartEditable
         droppable
         editable
         // themeSystem="cosmo"
-        theme="cosmo"
-        dateClick={ handleDateClick }
-        select={ handleSelect }
-        locale={ zhCnLocale }
+        theme='cosmo'
+        dateClick={handleDateClick}
+        select={handleSelect}
+        locale={zhCnLocale}
         defaultView='dayGridMonth'
-        plugins={ [ dayGridPlugin, interactionPlugin ] }
-        eventDrop={ handleEventDrop }
-        datesRender={ handleDateRender }
+        plugins={[dayGridPlugin, interactionPlugin]}
+        eventDrop={handleEventDrop}
+        datesRender={handleDateRender}
       />
     )
   }
 
-  shouldComponentUpdate (nextProps: CalendarViewProps) {
+  shouldComponentUpdate(nextProps: CalendarViewProps) {
     return _.isEqual(nextProps.event, this.props.event)
   }
 }
-
 
 export default CalendarView

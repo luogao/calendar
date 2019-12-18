@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Chip } from '@material-ui/core'
 import styled from 'styled-components'
+import { TagType } from '../../types'
 
 const DisplayTagWrapper = styled('div')`
   margin: 0.5em 0 0 0;
@@ -21,10 +22,19 @@ const DisplayTag = styled('span')`
   word-break: break-all;
 `
 
-class index extends PureComponent {
+interface TagsProps {
+  canDelete: boolean
+  isDisplay: boolean
+  tags: TagType[] | []
+  handleEditTag: Function
+  handleDeleteTag: Function
+}
+
+class index extends PureComponent<TagsProps> {
   renderDisplayTags = () => {
     const { tags, handleEditTag } = this.props
-    return tags.map(el => (
+    if (tags.length === 0) return null
+    return tags.map((el: TagType) => (
       <DisplayTagWrapper
         key={el.id}
         onClick={handleEditTag.bind(null, el)}
