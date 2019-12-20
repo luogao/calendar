@@ -23,8 +23,8 @@ const DisplayTag = styled('span')`
 `
 
 interface TagsProps {
-  canDelete: boolean
-  isDisplay: boolean
+  canDelete?: boolean
+  isDisplay?: boolean
   tags: TagType[] | []
   handleEditTag: Function
   handleDeleteTag: Function
@@ -34,7 +34,7 @@ class index extends PureComponent<TagsProps> {
   renderDisplayTags = () => {
     const { tags, handleEditTag } = this.props
     if (tags.length === 0) return null
-    return tags.map((el: TagType) => (
+    return (tags as Array<TagType>).map((el: TagType) => (
       <DisplayTagWrapper
         key={el.id}
         onClick={handleEditTag.bind(null, el)}
@@ -52,7 +52,7 @@ class index extends PureComponent<TagsProps> {
     const { tags, handleDeleteTag, handleEditTag, canDelete = true, isDisplay = false } = this.props
     if (isDisplay) return this.renderDisplayTags()
     if (tags && tags.length > 0) {
-      return tags.map(el => (
+      return (tags as Array<TagType>).map(el => (
         <Chip
           onClick={handleEditTag.bind(null, el)}
           key={el.id}

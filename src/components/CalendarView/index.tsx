@@ -3,9 +3,33 @@ import _ from 'lodash'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import zhCnLocale from '@fullcalendar/core/locales/zh-cn'
+// import zhCnLocale from '@fullcalendar/core'
 import { EventType } from '../../types'
 import { View, Duration, EventApi } from '@fullcalendar/core'
+
+const zhCnLocale = {
+  code: 'zh-cn',
+  week: {
+    // GB/T 7408-1994《数据元和交换格式·信息交换·日期和时间表示法》与ISO 8601:1988等效
+    dow: 1,
+    doy: 4 // The week that contains Jan 4th is the first week of the year.
+  },
+  buttonText: {
+    prev: '上月',
+    next: '下月',
+    today: '今天',
+    month: '月',
+    week: '周',
+    day: '日',
+    list: '日程'
+  },
+  weekLabel: '周',
+  allDayText: '全天',
+  eventLimitText: function(n: number) {
+    return '另外 ' + n + ' 个'
+  },
+  noEventsMessage: '没有事件显示'
+}
 
 export interface CalendarEventSelectArgType {
   start: Date
@@ -66,7 +90,7 @@ interface CalendarViewProps {
 
 class CalendarView extends Component<CalendarViewProps> {
   render() {
-    console.log('CalendarView render')
+    console.log('CalendarView render', this.props.event)
     const {
       fcRef,
       event,
@@ -91,8 +115,6 @@ class CalendarView extends Component<CalendarViewProps> {
         eventStartEditable
         droppable
         editable
-        // themeSystem="cosmo"
-        theme='cosmo'
         dateClick={handleDateClick}
         select={handleSelect}
         locale={zhCnLocale}
@@ -102,10 +124,6 @@ class CalendarView extends Component<CalendarViewProps> {
         datesRender={handleDateRender}
       />
     )
-  }
-
-  shouldComponentUpdate(nextProps: CalendarViewProps) {
-    return _.isEqual(nextProps.event, this.props.event)
   }
 }
 

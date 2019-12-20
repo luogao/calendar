@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, FormEvent, FormEventHandler } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -8,19 +8,19 @@ import {
   Button
 } from '@material-ui/core'
 import GColorPicker from '../../GColorPicker'
-import { TagType } from '../../../types/index'
+import { TagType, ReactClickEventHandleType } from '../../../types/index'
 
 interface TagEditorProps {
   modalOpen: boolean
   isEdit: boolean
   currentTag: TagType
   handleClose: ((event: {}, reason: 'backdropClick' | 'escapeKeyDown') => void) | undefined
-  handleTitleInput: (event: FormEvent<HTMLDivElement>) => void
+  handleTitleInput: FormEventHandler
   handleTextColorChange: Function
   handleBgColorChange: Function
-  handleDelete: (event: MouseEvent<HTMLAnchorElement, MouseEvent>) => void
-  handleCancel: (event: MouseEvent<HTMLAnchorElement, MouseEvent>) => void
-  handleSave: (event: MouseEvent<HTMLAnchorElement, MouseEvent>) => void
+  handleDelete: ReactClickEventHandleType
+  handleCancel: ReactClickEventHandleType
+  handleSave: ReactClickEventHandleType
 }
 
 class TagEditor extends Component<TagEditorProps> {

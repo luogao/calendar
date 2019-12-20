@@ -17,7 +17,7 @@ import AddIcon from '@material-ui/icons/Add'
 import zhCNLocale from 'date-fns/locale/zh-CN'
 import Tags from '../Tags'
 import GColorPicker from '../GColorPicker'
-import { EventType, TagType } from '../../types'
+import { EventType, TagType, ReactClickEventHandleType } from '../../types'
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 
 interface EventEditorProps {
@@ -30,24 +30,19 @@ interface EventEditorProps {
   handleClose: ((event: {}, reason: 'backdropClick' | 'escapeKeyDown') => void) | undefined
   handleStartDateChange: (date: MaterialUiPickersDate | null, value?: string | null) => void
   handleEndDateChange: (date: MaterialUiPickersDate | null, value?: string | null) => void
-  handleTextColorChange: (color: any) => void
-  handleBgColorChange: (color: any) => void
-  handleDelete: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined
-  handleCancel: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined
-  handleSaveEvent: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined
+  handleTextColorChange: (color: { hex: string }) => void
+  handleBgColorChange: (color: { hex: string }) => void
+  handleDelete: ReactClickEventHandleType
+  handleCancel: ReactClickEventHandleType
+  handleSaveEvent: ReactClickEventHandleType
   allTags: TagType[] | []
   handleDeleteTag: (tag: TagType) => void
   handleEditTag: (tag: TagType) => void
   handleAddTag: () => void
-  handleTagChange:
-    | ((
-        event: React.ChangeEvent<{
-          name?: string | undefined
-          value: unknown
-        }>,
-        child: React.ReactNode
-      ) => void)
-    | undefined
+  handleTagChange: (
+    event: React.ChangeEvent<{ name?: string; value: unknown }>,
+    child: React.ReactNode
+  ) => void
 }
 
 export default class EventEditor extends Component<EventEditorProps> {
@@ -144,7 +139,7 @@ export default class EventEditor extends Component<EventEditorProps> {
                 <em>无</em>
               </MenuItem>
               {allTags.length > 0 &&
-                allTags.map(el => (
+                (allTags as Array<TagType>).map((el: TagType) => (
                   <MenuItem value={el.id} key={el.id}>
                     {el.title}
                   </MenuItem>

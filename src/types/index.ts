@@ -30,3 +30,8 @@ export interface StateType {
   event: EventType[] | []
   currentViewEvents: EventType[] | []
 }
+
+
+export type ReactClickEventHandleType = ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined
+
+export type ReactClickEventType = React.MouseEvent<HTMLButtonElement, MouseEvent>

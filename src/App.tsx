@@ -88,7 +88,7 @@ function App() {
 
   let fc = React.useRef<FullCalendar>(null)
   let calendarWrapper = React.useRef<HTMLDivElement>(null)
-  function getTimestampByDate(date: Date | MaterialUiPickersDate) {
+  function getTimestampByDate(date: Date) {
     return new Date(date).getTime()
   }
 
@@ -209,7 +209,6 @@ function App() {
   }
 
   function handleSelect(e: CalendarEventSelectArgType) {
-    console.log('handleSelect', e)
     const { end, start } = e
     setIsEdit(false)
     setCurrentEvent({ ...currentEvent, end, start })
@@ -221,7 +220,6 @@ function App() {
   }
 
   function handleEventClick(e: CalendarEventClickArgType) {
-    console.log('handleEventClick', e.event)
     const {
       title,
       start,
@@ -264,14 +262,14 @@ function App() {
     })
   }
 
-  function handleTextColorChange(e) {
+  function handleTextColorChange(e: { hex: string }) {
     setCurrentEvent({
       ...currentEvent,
       textColor: e.hex
     })
   }
 
-  function handleBgColorChange(e) {
+  function handleBgColorChange(e: { hex: string }) {
     setCurrentEvent({
       ...currentEvent,
       backgroundColor: e.hex,
@@ -313,7 +311,6 @@ function App() {
   }
 
   function handleEditTag(tag: TagType) {
-    console.log({ tag })
     setCurrentTag(tag)
     setTagIsEdit(true)
     openTagModal()
@@ -336,15 +333,15 @@ function App() {
     closeTagModal()
   }
 
-  function handleTagTitleChange(e) {
+  function handleTagTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setCurrentTag({ ...currentTag, title: e.target.value })
   }
 
-  function handleTagBgChange(e) {
+  function handleTagBgChange(e: { hex: string }) {
     setCurrentTag({ ...currentTag, backgroundColor: e.hex })
   }
 
-  function handleTagTextColorChange(e) {
+  function handleTagTextColorChange(e: { hex: string }) {
     setCurrentTag({ ...currentTag, textColor: e.hex })
   }
 
@@ -370,7 +367,7 @@ function App() {
   function handleTagChange(
     e: React.ChangeEvent<{
       name?: string | undefined
-      value: string
+      value: unknown
     }>,
     child: React.ReactNode
   ) {
@@ -382,7 +379,7 @@ function App() {
           borderColor: tag.backgroundColor,
           backgroundColor: tag.backgroundColor,
           textColor: tag.textColor,
-          tagId: e.target.value
+          tagId: tag.id
         })
       }
     }
@@ -392,11 +389,12 @@ function App() {
     const { activeEnd, activeStart } = view
     const currentViewEvents = event.filter(e => {
       return (
+        e.start &&
+        e.end &&
         getTimestampByDate(e.start) > getTimestampByDate(activeStart) &&
         getTimestampByDate(e.end) < getTimestampByDate(activeEnd)
       )
     })
-    console.log({ currentViewEvents })
     // setCurrentViewEvents(currentViewEvents)
     // dispatch({ type: 'setCurrentViewEvents', payload: currentViewEvents })
   }
@@ -407,7 +405,7 @@ function App() {
         <div className='main-content-wrapper'>
           <div className='calendar-wrapper' ref={calendarWrapper}>
             <CalendarView
-              event={state.event}
+              event={event}
               fcRef={fc}
               handleEventClick={handleEventClick}
               handleDateClick={handleDateClick}
