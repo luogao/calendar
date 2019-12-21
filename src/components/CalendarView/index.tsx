@@ -3,33 +3,14 @@ import _ from 'lodash'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-// import zhCnLocale from '@fullcalendar/core'
+
 import { EventType } from '../../types'
 import { View, Duration, EventApi } from '@fullcalendar/core'
-
-const zhCnLocale = {
-  code: 'zh-cn',
-  week: {
-    // GB/T 7408-1994《数据元和交换格式·信息交换·日期和时间表示法》与ISO 8601:1988等效
-    dow: 1,
-    doy: 4 // The week that contains Jan 4th is the first week of the year.
-  },
-  buttonText: {
-    prev: '上月',
-    next: '下月',
-    today: '今天',
-    month: '月',
-    week: '周',
-    day: '日',
-    list: '日程'
-  },
-  weekLabel: '周',
-  allDayText: '全天',
-  eventLimitText: function(n: number) {
-    return '另外 ' + n + ' 个'
-  },
-  noEventsMessage: '没有事件显示'
-}
+import { connect, DispatchProp } from 'react-redux'
+import { StoreStateType } from '../../redux/reducers'
+import { getTimestampByDate } from '../../utils'
+import { zhCnLocale } from '../../constants'
+import { setEvents, setCurrentViewEvents } from '../../redux/actions/events'
 
 export interface CalendarEventSelectArgType {
   start: Date
@@ -75,31 +56,69 @@ export interface CalendarDatesRenderArgType {
 }
 
 interface CalendarViewProps {
-  fcRef: any
-  event: EventType[] | []
-  handleEventClick: (arg: CalendarEventClickArgType) => boolean | void
+  events: EventType[] | []
+  // handleEventClick: (arg: CalendarEventClickArgType) => boolean | void
 
-  handleDateClick: (arg: CalendarDateClickArgType) => void
+  // handleDateClick: (arg: CalendarDateClickArgType) => void
 
-  handleSelect: (arg: CalendarEventSelectArgType) => void
-
-  handleEventDrop: (arg: CalendarEventDropArgType) => void
-
-  handleDateRender: (arg: CalendarDatesRenderArgType) => void
+  // handleSelect: (arg: CalendarEventSelectArgType) => void
 }
 
-class CalendarView extends Component<CalendarViewProps> {
-  render() {
-    console.log('CalendarView render', this.props.event)
+class CalendarView extends Component<CalendarViewProps & DispatchProp> {
+  handleEventDrop = (e: CalendarEventDropArgType) => {
+    const { events } = this.props
     const {
-      fcRef,
-      event,
-      handleEventClick,
-      handleDateClick,
-      handleSelect,
-      handleEventDrop,
-      handleDateRender
-    } = this.props
+      title,
+      start,
+      end,
+      backgroundColor,
+      borderColor,
+      textColor,
+      id,
+      allDay,
+      extendedProps: { tagId = '' }
+    } = e.event
+    const targetIndex = events.findIndex(e => e.id === id)
+    events.splice(targetIndex, 1)
+
+    this.props.dispatch(
+      setEvents([
+        ...events,
+        { title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId }
+      ])
+    )
+  }
+
+  handleDateRender = ({ view, el }: CalendarDatesRenderArgType) => {
+    const { events } = this.props
+    const { activeEnd, activeStart } = view
+    const currentViewEvents = events.filter(e => {
+      return (
+        e.start &&
+        e.end &&
+        getTimestampByDate(e.start) > getTimestampByDate(activeStart) &&
+        getTimestampByDate(e.end) < getTimestampByDate(activeEnd)
+      )
+    })
+    console.log({ currentViewEvents })
+    this.props.dispatch(setCurrentViewEvents(currentViewEvents))
+  }
+
+  handleSelect = (e: CalendarEventSelectArgType) => {
+    console.log(e)
+  }
+
+  handleDateClick = (e: CalendarDateClickArgType) => {
+    console.log(e)
+  }
+
+  handleEventClick = (e: CalendarEventClickArgType) => {
+    console.log(e)
+  }
+
+  render() {
+    console.log('CalendarView render', this.props)
+    const { events } = this.props
     return (
       <FullCalendar
         header={{
@@ -108,23 +127,28 @@ class CalendarView extends Component<CalendarViewProps> {
           right: ' prev today next'
         }}
         height='parent'
-        ref={fcRef}
-        events={event}
-        eventClick={handleEventClick}
+        events={events}
+        eventClick={this.handleEventClick}
         selectable
         eventStartEditable
         droppable
         editable
-        dateClick={handleDateClick}
-        select={handleSelect}
+        dateClick={this.handleDateClick}
+        select={this.handleSelect}
         locale={zhCnLocale}
         defaultView='dayGridMonth'
         plugins={[dayGridPlugin, interactionPlugin]}
-        eventDrop={handleEventDrop}
-        datesRender={handleDateRender}
+        eventDrop={this.handleEventDrop}
+        datesRender={this.handleDateRender}
       />
     )
   }
 }
 
-export default CalendarView
+const mapStateToProps = (state: StoreStateType) => {
+  return {
+    events: state.events.events
+  }
+}
+
+export default connect(mapStateToProps)(CalendarView)

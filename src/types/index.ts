@@ -1,6 +1,5 @@
 
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
-
 export interface EventType {
   id: string
   tagId: string
@@ -19,12 +18,6 @@ export interface TagType {
   title: string
   id: string
 }
-
-export type EventAction =
-  | { type: 'setEvent', payload: EventType[] | [] }
-  | { type: 'setCurrentViewEvents'; amount: number, payload: EventType[] | [] };
-
-
 
 export interface StateType {
   event: EventType[] | []
