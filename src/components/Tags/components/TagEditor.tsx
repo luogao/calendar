@@ -19,7 +19,7 @@ import {
 import { StoreStateType } from '../../../redux/reducers'
 import nanoid from 'nanoid'
 import { setEvents } from '../../../redux/actions/events'
-
+import _ from 'lodash'
 interface TagEditorProps {
   tags: TagType[] | []
   events: EventType[] | []
@@ -154,6 +154,14 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
           </Button>
         </DialogActions>
       </Dialog>
+    )
+  }
+
+  shouldComponentUpdate(nextProps: TagEditorProps) {
+    return (
+      !_.isEqual(nextProps.currentTag, this.props.currentTag) ||
+      nextProps.isEdit !== this.props.isEdit ||
+      nextProps.modalOpen !== this.props.modalOpen
     )
   }
 }

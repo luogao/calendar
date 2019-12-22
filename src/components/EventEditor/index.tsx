@@ -55,6 +55,7 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
   }
 
   handleAddTag = () => {
+    this.props.dispatch(setCurrentTag(emptyTag))
     this.props.dispatch(toggleTagEditModal(true))
   }
 
@@ -65,6 +66,7 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
     }>,
     child: React.ReactNode
   ) => {
+    console.log({ '222': e.target.value })
     if (e.target.value) {
       const tag = this.props.allTags.find(t => t.id === e.target.value)
       if (tag) {
@@ -77,6 +79,12 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
         })
         this.props.dispatch(setCurrentTag(tag))
       }
+    } else {
+      this.setCurrentEvent({
+        ...this.props.currentEvent,
+        tagId: ''
+      })
+      this.props.dispatch(setCurrentTag(emptyTag))
     }
   }
 
@@ -221,11 +229,11 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
             />
           </div>
           <div className='color-picker-wrapper'>
-            <div className='color-picker-label'> 标签 </div>
+            <div className='color-picker-label'>
+              标签 {currentEvent.tagId ? '' : '「 请点击下拉框选择 」'}{' '}
+            </div>
             <Select value={currentEvent.tagId} onChange={this.handleTagChange}>
-              <MenuItem value=''>
-                <em>无</em>
-              </MenuItem>
+              <MenuItem value=''> 无 </MenuItem>
               {allTags.length > 0 &&
                 (allTags as Array<TagType>).map((el: TagType) => (
                   <MenuItem value={el.id} key={el.id}>
