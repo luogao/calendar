@@ -21,7 +21,9 @@ interface AppState {
   deleteConfirmDialogOpen: boolean
 }
 
-interface AppProps {}
+interface AppProps {
+  removeStoreSub: Function
+}
 
 class App extends React.Component<AppProps & DispatchProp, AppState> {
   state = {
@@ -56,6 +58,10 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
 
   handleDeleteAllPress = () => {
     this.setDleteConfirmDialogOpen(true)
+  }
+
+  componentWillUnmount() {
+    this.props.removeStoreSub()
   }
 
   render() {

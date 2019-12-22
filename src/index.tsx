@@ -39,11 +39,10 @@ function handleChange() {
   }
 }
 const unsubscribe = store.subscribe(handleChange)
-// unsubscribe()
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <App removeStoreSub={unsubscribe} />
   </Provider>,
   document.getElementById('root')
 )
