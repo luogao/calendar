@@ -8,7 +8,7 @@ import {
   Button
 } from '@material-ui/core'
 import GColorPicker from '../../GColorPicker'
-import { TagType } from '../../../types/index'
+import { TagType, EventType } from '../../../types/index'
 import { connect, DispatchProp } from 'react-redux'
 import {
   setCurrentTag,
@@ -18,9 +18,11 @@ import {
 } from '../../../redux/actions/tags'
 import { StoreStateType } from '../../../redux/reducers'
 import nanoid from 'nanoid'
+import { setEvents } from '../../../redux/actions/events'
 
 interface TagEditorProps {
   tags: TagType[] | []
+  events: EventType[] | []
   modalOpen: boolean
   isEdit: boolean
   currentTag: TagType
@@ -57,6 +59,22 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
     this.setCurrentTag({ ...this.props.currentTag, textColor: e.hex })
   }
 
+  syncRelatedEvent = () => {
+    const events = (this.props.events as Array<EventType>).map((event: EventType) => {
+      if (event.tagId !== this.props.currentTag.id) {
+        return event
+      } else {
+        return {
+          ...event,
+          borderColor: this.props.currentTag.backgroundColor,
+          backgroundColor: this.props.currentTag.backgroundColor,
+          textColor: this.props.currentTag.textColor
+        }
+      }
+    })
+    this.props.dispatch(setEvents(events))
+  }
+
   updateTag = () => {
     const tags = (this.props.tags as Array<TagType>).map(tag => {
       if (tag.id !== this.props.currentTag.id) {
@@ -65,11 +83,13 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
         return this.props.currentTag
       }
     })
+
     this.props.dispatch(setTags(tags))
+    this.syncRelatedEvent()
   }
 
   createTag = () => {
-    this.props.dispatch(setTags([...this.props.tags, {...this.props.currentTag, id: nanoid(8)}]))
+    this.props.dispatch(setTags([...this.props.tags, { ...this.props.currentTag, id: nanoid(8) }]))
   }
 
   handleSave = () => {
@@ -143,7 +163,8 @@ const mapStateToProps = (state: StoreStateType) => {
     tags: state.tags.tags,
     currentTag: state.tags.currentTag,
     isEdit: !!state.tags.currentTag.id,
-    modalOpen: state.tags.tagEditModalOpen
+    modalOpen: state.tags.tagEditModalOpen,
+    events: state.events.events
   }
 }
 
