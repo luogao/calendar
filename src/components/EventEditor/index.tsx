@@ -22,8 +22,8 @@ import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import { connect, DispatchProp } from 'react-redux'
 import { StoreStateType } from '../../redux/reducers'
 import { setCurrentEvent, toggleEventModal, setEvents } from '../../redux/actions/events'
-import { toggleTagEditModal } from '../../redux/actions/tags'
-import { emptyEvent } from '../../constants'
+import { toggleTagEditModal, setCurrentTag, setTags } from '../../redux/actions/tags'
+import { emptyEvent, emptyTag } from '../../constants'
 import nanoid from 'nanoid'
 
 interface EventEditorProps {
@@ -31,6 +31,7 @@ interface EventEditorProps {
   isEdit: boolean
   currentEvent: EventType
   allTags: TagType[] | []
+  currentTag: TagType
   events: EventType[] | []
 }
 
@@ -50,6 +51,7 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
   handleModalClose = () => {
     this.props.dispatch(toggleEventModal(false))
     this.setCurrentEvent(emptyEvent)
+    this.props.dispatch(setCurrentTag(emptyTag))
   }
 
   handleAddTag = () => {
@@ -73,6 +75,7 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
           textColor: tag.textColor,
           tagId: tag.id
         })
+        this.props.dispatch(setCurrentTag(tag))
       }
     }
   }
@@ -90,6 +93,7 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
       ...this.props.currentEvent,
       textColor: e.hex
     })
+    this.props.dispatch(setCurrentTag({ ...this.props.currentTag, textColor: e.hex }))
   }
 
   handleBgColorChange = (e: { hex: string }) => {
@@ -98,12 +102,14 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
       backgroundColor: e.hex,
       borderColor: e.hex
     })
+    this.props.dispatch(setCurrentTag({ ...this.props.currentTag, backgroundColor: e.hex }))
   }
 
   handleDelete = () => {
     this.props.dispatch(
       setEvents(this.props.events.filter(event => event.id !== this.props.currentEvent.id))
     )
+    this.handleModalClose()
   }
 
   editEvent = () => {
@@ -126,10 +132,23 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
     this.props.dispatch(setEvents([...this.props.events, _currentEvent]))
   }
 
+  syncTagChange = () => {
+    if (this.props.currentTag.id) {
+      const tags = (this.props.allTags as Array<TagType>).map((tag: TagType) => {
+        if (tag.id !== this.props.currentTag.id) {
+          return tag
+        } else {
+          return this.props.currentTag
+        }
+      })
+      this.props.dispatch(setTags(tags))
+    }
+  }
+
   handleSaveEvent = () => {
     this.props.isEdit ? this.editEvent() : this.addEvent()
+    this.syncTagChange()
     this.handleModalClose()
-    setCurrentEvent(emptyEvent)
   }
 
   render() {
@@ -171,6 +190,7 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
               </Grid>
               <Grid item xs={6}>
                 <KeyboardDatePicker
+                  minDate={currentEvent.start}
                   autoOk
                   fullWidth
                   format='yyyy-MM-dd'
@@ -252,7 +272,8 @@ const mapStateToProps = (state: StoreStateType) => {
     currentEvent: state.events.currentEvent,
     isEdit: !!state.events.currentEvent.id,
     allTags: state.tags.tags,
-    events: state.events.events
+    events: state.events.events,
+    currentTag: state.tags.currentTag
   }
 }
 

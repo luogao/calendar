@@ -7,15 +7,13 @@ import { EventType } from '../../types'
 import { View, Duration, EventApi } from '@fullcalendar/core'
 import { connect, DispatchProp } from 'react-redux'
 import { StoreStateType } from '../../redux/reducers'
-import { getTimestampByDate } from '../../utils'
 import { zhCnLocale } from '../../constants'
 import {
   setEvents,
-  setCurrentViewEvents,
   setCurrentEvent,
-  toggleEventModal
+  toggleEventModal,
+  setEventsRange
 } from '../../redux/actions/events'
-import { setSelectedTags } from '../../redux/actions/tags'
 
 export interface CalendarEventSelectArgType {
   start: Date
@@ -91,17 +89,8 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
   }
 
   handleDateRender = ({ view, el }: CalendarDatesRenderArgType) => {
-    const { events } = this.props
     const { activeEnd, activeStart } = view
-    const currentViewEvents = events.filter(e => {
-      return (
-        e.start &&
-        e.end &&
-        getTimestampByDate(e.start) > getTimestampByDate(activeStart) &&
-        getTimestampByDate(e.end) < getTimestampByDate(activeEnd)
-      )
-    })
-    this.props.dispatch(setCurrentViewEvents(currentViewEvents))
+    this.props.dispatch(setEventsRange({ start: activeStart, end: activeEnd }))
   }
 
   handleOpenEventModal = () => {
@@ -132,7 +121,7 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
       setCurrentEvent({
         title,
         start,
-        end,
+        end: end ? end : start,
         backgroundColor,
         borderColor,
         textColor,

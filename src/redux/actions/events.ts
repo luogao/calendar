@@ -43,3 +43,10 @@ export const toggleEventModal = (toggle: boolean) => ({
     toggle
   }
 })
+
+export const setEventsRange = ({ start, end }: { start: Date, end: Date }) => ({
+  type: EVENT_ACITON_TYPE.SET_EVENTS_RANGE,
+  payload: {
+    eventRange: { start, end }
+  }
+})

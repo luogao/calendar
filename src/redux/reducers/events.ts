@@ -11,6 +11,7 @@ export interface EventStateType {
   currentViewEvents: EventType[] | []
   currentEvent: EventType
   eventEditModalOpen: boolean
+  eventRange: { start: Date, end: Date }
 }
 
 const initialState: EventStateType = {
@@ -18,7 +19,8 @@ const initialState: EventStateType = {
   currentViewEvents: [],
   selectedEvent: null,
   currentEvent: emptyEvent,
-  eventEditModalOpen: false
+  eventEditModalOpen: false,
+  eventRange: { start: new Date(), end: new Date() }
 };
 
 type EventAction =
@@ -28,6 +30,7 @@ type EventAction =
   | { type: EVENT_ACITON_TYPE.SET_SELECTED_EVENT, payload: { selectedEvent: EventType | null } }
   | { type: EVENT_ACITON_TYPE.SET_CURRENT_EVENT, payload: { event: EventType } }
   | { type: EVENT_ACITON_TYPE.TOGGLE_EVENT_MODAL, payload: { toggle: boolean } }
+  | { type: EVENT_ACITON_TYPE.SET_EVENTS_RANGE, payload: { eventRange: { start: Date, end: Date } } }
 
 
 export default function (state = initialState, action: EventAction) {
@@ -76,6 +79,13 @@ export default function (state = initialState, action: EventAction) {
       return {
         ...state,
         eventEditModalOpen: toggle
+      };
+    }
+    case EVENT_ACITON_TYPE.SET_EVENTS_RANGE: {
+      const { eventRange } = action.payload;
+      return {
+        ...state,
+        eventRange
       };
     }
     default:

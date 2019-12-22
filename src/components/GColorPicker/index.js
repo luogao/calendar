@@ -33,15 +33,34 @@ class GColorPicker extends React.PureComponent {
     this.props.onChange && this.props.onChange(color)
   }
 
-  getPreviewColor = () => (typeof this.state.color === 'string' ? this.state.color : `rgba(${this.state.color.r}, ${this.state.color.g}, ${this.state.color.b}, ${this.state.color.a})`)
+  getPreviewColor = () =>
+    typeof this.state.color === 'string'
+      ? this.state.color
+      : `rgba(${this.state.color.r}, ${this.state.color.g}, ${this.state.color.b}, ${this.state.color.a})`
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.color !== state.color) {
+      return {
+        color: props.color
+      }
+    }
+    return null
+  }
 
   render() {
     const previewColor = this.getPreviewColor()
 
     return (
-      <div className='g-color-picker-wrapper' style={this.props.containerStyle} ref='colorPickerWrapper'>
+      <div
+        className='g-color-picker-wrapper'
+        style={this.props.containerStyle}
+        ref='colorPickerWrapper'
+      >
         <div className='g-color-picker-swatch' onClick={this.handleClick}>
-          <div className='g-color-picker-preview-color-after' style={{ backgroundColor: previewColor }}></div>
+          <div
+            className='g-color-picker-preview-color-after'
+            style={{ backgroundColor: previewColor }}
+          ></div>
           <div className='g-color-picker-preview-color' style={{ backgroundColor: previewColor }} />
         </div>
         {this.state.displayColorPicker ? (

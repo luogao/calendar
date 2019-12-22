@@ -13,6 +13,7 @@ const DisplayTagWrapper = styled('div')`
   max-width: 100%;
   cursor: pointer;
   text-align: left;
+  min-width: 100%;
 `
 
 const DisplayTag = styled('span')`

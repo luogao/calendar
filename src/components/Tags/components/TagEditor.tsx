@@ -65,7 +65,6 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
         return this.props.currentTag
       }
     })
-    console.log(this.props.currentTag)
     this.props.dispatch(setTags(tags))
   }
 

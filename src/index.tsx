@@ -8,17 +8,32 @@ import store from './redux'
 import _ from 'lodash'
 import { setSelectedTags } from './redux/actions/tags'
 import { StoreStateType } from './redux/reducers'
-import { EventType } from './types'
+import { EventType, TagType } from './types'
+import { getTimestampByDate } from './utils'
 
 let currentValue: StoreStateType | null = null
 function handleChange() {
   let previousValue = currentValue
   currentValue = store.getState()
-  if (!_.isEqual(previousValue, currentValue)) {
+  if (!_.isEqual(previousValue, currentValue) && currentValue) {
+    const { start, end } = currentValue.events.eventRange
+    const currentViewEvents = (currentValue.events.events as Array<EventType>).filter(
+      (e: EventType) => {
+        return (
+          e.start &&
+          e.end &&
+          getTimestampByDate(e.start) > getTimestampByDate(start) &&
+          getTimestampByDate(e.end) < getTimestampByDate(end)
+        )
+      }
+    )
     const currentEventsTags = _.uniq(
-      (currentValue.events.currentViewEvents as Array<EventType>)
+      (currentViewEvents as Array<EventType>)
         .filter(event => event.tagId !== '')
         .map(event => event.tagId)
+    )
+    const selectedTags = (currentValue.tags.tags as Array<TagType>).filter(tag =>
+      currentEventsTags.includes(tag.id)
     )
     store.dispatch(setSelectedTags(currentEventsTags))
   }
