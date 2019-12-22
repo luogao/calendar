@@ -146,11 +146,7 @@ export default class EventEditor extends Component<EventEditorProps> {
                 ))}
             </Select>
             <div className='tags-wrapper'>
-              <Tags
-                tags={allTags}
-                handleDeleteTag={handleDeleteTag}
-                handleEditTag={handleEditTag}
-              />
+              <Tags />
               <IconButton
                 onClick={handleAddTag}
                 aria-label='delete'

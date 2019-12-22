@@ -36,6 +36,6 @@ export const downloadFile = (fileName: string, content: string) => {
 }
 
 
-export function getTimestampByDate(date: Date) {
+export function getTimestampByDate (date: Date) {
   return new Date(date).getTime()
 }

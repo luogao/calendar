@@ -1,7 +1,10 @@
 import React, { PureComponent } from 'react'
 import { Chip } from '@material-ui/core'
 import styled from 'styled-components'
-import { TagType } from '../../types'
+import { TagType, EventType } from '../../types'
+import { DispatchProp, connect } from 'react-redux'
+import { setTags, setCurrentTag, toggleTagEditModal } from '../../redux/actions/tags'
+import { StoreStateType } from '../../redux/reducers'
 
 const DisplayTagWrapper = styled('div')`
   margin: 0.5em 0 0 0;
@@ -23,21 +26,42 @@ const DisplayTag = styled('span')`
 `
 
 interface TagsProps {
-  canDelete?: boolean
   isDisplay?: boolean
   tags: TagType[] | []
-  handleEditTag: Function
-  handleDeleteTag: Function
+  selectedTags: TagType[] | []
+}
+interface TagsState {
+  currentTag: TagType | null
+  editModalOpen: boolean
 }
 
-class index extends PureComponent<TagsProps> {
+class index extends PureComponent<TagsProps & DispatchProp, TagsState> {
+  state = {
+    currentTag: null,
+    editModalOpen: false
+  }
+
+  handleEditTag = (tag: TagType) => {
+    this.props.dispatch(setCurrentTag(tag))
+    this.setEditModalOpen(true)
+  }
+
+  setEditModalOpen = (open: boolean) => {
+    this.props.dispatch(toggleTagEditModal(open))
+  }
+
+  handleDeleteTag = (tag: TagType) => {
+    const newTags = this.props.tags.filter(el => el.id !== tag.id)
+    this.props.dispatch(setTags(newTags))
+  }
+
   renderDisplayTags = () => {
-    const { tags, handleEditTag } = this.props
-    if (tags.length === 0) return null
-    return (tags as Array<TagType>).map((el: TagType) => (
+    const { selectedTags } = this.props
+    if (selectedTags.length === 0) return null
+    return (selectedTags as Array<TagType>).map((el: TagType) => (
       <DisplayTagWrapper
         key={el.id}
-        onClick={handleEditTag.bind(null, el)}
+        onClick={this.handleEditTag.bind(this, el)}
         style={{
           backgroundColor: el.backgroundColor,
           color: el.textColor
@@ -48,27 +72,46 @@ class index extends PureComponent<TagsProps> {
     ))
   }
 
+  renderNormalTags = () => {
+    const { tags } = this.props
+    if (tags.length === 0) return null
+    return (tags as Array<TagType>).map((el: TagType) => (
+      <Chip
+        onClick={this.handleEditTag.bind(this, el)}
+        key={el.id}
+        label={el.title}
+        onDelete={this.handleDeleteTag.bind(this, el)}
+        color='primary'
+        style={{
+          backgroundColor: el.backgroundColor,
+          color: el.textColor
+        }}
+      />
+    ))
+  }
+
   render() {
-    const { tags, handleDeleteTag, handleEditTag, canDelete = true, isDisplay = false } = this.props
-    if (isDisplay) return this.renderDisplayTags()
-    if (tags && tags.length > 0) {
-      return (tags as Array<TagType>).map(el => (
-        <Chip
-          onClick={handleEditTag.bind(null, el)}
-          key={el.id}
-          label={el.title}
-          onDelete={canDelete ? handleDeleteTag.bind(null, el) : null}
-          color='primary'
-          style={{
-            backgroundColor: el.backgroundColor,
-            color: el.textColor
-          }}
-        />
-      ))
+    const { isDisplay = false } = this.props
+    if (isDisplay) {
+      return this.renderDisplayTags()
     } else {
-      return null
+      return this.renderNormalTags()
     }
   }
 }
 
-export default index
+const mapStateToProps = (state: StoreStateType) => {
+  const currentEventsTags = (state.events.currentViewEvents as Array<EventType>).map(
+    event => event.tagId
+  )
+  const selectedTags = (state.tags.tags as Array<TagType>).filter(tag =>
+    currentEventsTags.includes(tag.id)
+  )
+
+  return {
+    selectedTags,
+    tags: state.tags.tags
+  }
+}
+
+export default connect(mapStateToProps)(index)

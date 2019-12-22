@@ -26,6 +26,8 @@ import { CalendarDatesRenderArgType, CalendarEventDropArgType } from './componen
 import { getImgSrc, generate, downloadFile } from './utils'
 import { connect, DispatchProp } from 'react-redux'
 import { addEvent, setEvents } from './redux/actions/events'
+import { StoreStateType } from './redux/reducers'
+import { setTags } from './redux/actions/tags'
 
 // import LC from './AVStore'
 const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
@@ -52,12 +54,14 @@ const emptyTag = {
 
 interface AppState {
   deleteConfirmDialogOpen: boolean
+  currentTag: TagType
 }
 interface AppProps {}
 
 class App extends React.Component<AppProps & DispatchProp, AppState> {
   state = {
-    deleteConfirmDialogOpen: false
+    deleteConfirmDialogOpen: false,
+    currentTag: emptyTag
   }
   // const [event, setEvent] = React.useState<EventType[] | []>(
   //   storeEvent ? JSON.parse(storeEvent) : []
@@ -148,6 +152,11 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
       })
     }
   }
+  setCurrentTag = (tag: TagType) => {
+    this.setState({
+      currentTag: tag
+    })
+  }
 
   // function handleCancel() {
   //   setCurrentEvent(emptyEvent)
@@ -237,16 +246,9 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     this.setDleteConfirmDialogOpen(true)
   }
 
-  // function handleDeleteTag(tag: TagType) {
-  //   const newTags = tags.filter(el => el.id !== tag.id)
-  //   setTags(newTags)
-  // }
-
-  // function handleEditTag(tag: TagType) {
-  //   setCurrentTag(tag)
-  //   setTagIsEdit(true)
-  //   openTagModal()
-  // }
+  handleEditTag = (tag: TagType) => {
+    this.setCurrentTag(tag)
+  }
 
   // function handleAddTag() {
   //   openTagModal()
@@ -256,38 +258,17 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
   //   setTagModalOpen(true)
   // }
 
-  // function closeTagModal() {
-  //   setCurrentTag(emptyTag)
-  //   setTagModalOpen(false)
-  // }
-
-  // function deleteTag() {
-  //   closeTagModal()
-  // }
-
-  // function handleTagTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
-  //   setCurrentTag({ ...currentTag, title: e.target.value })
-  // }
-
-  // function handleTagBgChange(e: { hex: string }) {
-  //   setCurrentTag({ ...currentTag, backgroundColor: e.hex })
-  // }
-
-  // function handleTagTextColorChange(e: { hex: string }) {
-  //   setCurrentTag({ ...currentTag, textColor: e.hex })
-  // }
-
-  // function createTag() {
+  // createTag() {
   //   setTags([...tags, { ...currentTag, id: nanoid(8) }])
   // }
 
-  // function updateTag() {
+  // updateTag() {
   //   const targetIndex = tags.findIndex(el => el.id === currentTag.id)
   //   tags[targetIndex] = currentTag
   //   setTags([...tags])
   // }
 
-  // function handleSaveTag() {
+  // handleSaveTag() {
   //   if (currentTag.id) {
   //     updateTag()
   //   } else {
@@ -328,13 +309,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
           </div>
           <div className='side-bar'>
             <div className='tags-wrapper'>
-              {/* <Tags
-                tags={selectedTags}
-                isDisplay
-                handleDeleteTag={handleDeleteTag}
-                handleEditTag={handleEditTag}
-                canDelete={false}
-              /> */}
+              <Tags isDisplay />
             </div>
             <div className='action-btns'>
               <Button onClick={this.handleSave} variant='contained' color='primary' fullWidth>
@@ -369,20 +344,8 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
           handleEditTag={handleEditTag}
           handleDeleteTag={handleDeleteTag}
           handleTagChange={handleTagChange}
-        />
-        <TagEditor
-          modalOpen={tagModalOpen}
-          handleClose={closeTagModal}
-          isEdit={tagIsEdit}
-          currentTag={currentTag}
-          handleTitleInput={handleTagTitleChange}
-          handleTextColorChange={handleTagTextColorChange}
-          handleBgColorChange={handleTagBgChange}
-          handleDelete={deleteTag}
-          handleCancel={closeTagModal}
-          handleSave={handleSaveTag}
-        />
-         */}
+        />  */}
+        <TagEditor />
         <Dialog
           open={this.state.deleteConfirmDialogOpen}
           onClose={this.handleDeleteConfirmClose}

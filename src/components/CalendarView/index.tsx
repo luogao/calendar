@@ -3,7 +3,6 @@ import _ from 'lodash'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-
 import { EventType } from '../../types'
 import { View, Duration, EventApi } from '@fullcalendar/core'
 import { connect, DispatchProp } from 'react-redux'
@@ -11,6 +10,7 @@ import { StoreStateType } from '../../redux/reducers'
 import { getTimestampByDate } from '../../utils'
 import { zhCnLocale } from '../../constants'
 import { setEvents, setCurrentViewEvents } from '../../redux/actions/events'
+import { setSelectedTags } from '../../redux/actions/tags'
 
 export interface CalendarEventSelectArgType {
   start: Date
@@ -100,7 +100,6 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
         getTimestampByDate(e.end) < getTimestampByDate(activeEnd)
       )
     })
-    console.log({ currentViewEvents })
     this.props.dispatch(setCurrentViewEvents(currentViewEvents))
   }
 
