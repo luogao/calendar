@@ -27,7 +27,7 @@ export const setDefaultCurrentTag = () => ({
 })
 
 export const toggleTagEditModal = (toggle: boolean) => ({
-  type: TAG_ACTION_TYPE.TOGGLE_MODAL,
+  type: TAG_ACTION_TYPE.TOGGLE_TAG_MODAL,
   payload: {
     toggle
   }

@@ -28,3 +28,18 @@ export const setSelectedEvent = (event: EventType) => ({
     event
   }
 })
+
+export const setCurrentEvent = (event: EventType) => ({
+  type: EVENT_ACITON_TYPE.SET_CURRENT_EVENT,
+  payload: {
+    event
+  }
+})
+
+
+export const toggleEventModal = (toggle: boolean) => ({
+  type: EVENT_ACITON_TYPE.TOGGLE_EVENT_MODAL,
+  payload: {
+    toggle
+  }
+})

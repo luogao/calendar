@@ -19,57 +19,125 @@ import Tags from '../Tags'
 import GColorPicker from '../GColorPicker'
 import { EventType, TagType, ReactClickEventHandleType } from '../../types'
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
+import { connect, DispatchProp } from 'react-redux'
+import { StoreStateType } from '../../redux/reducers'
+import { setCurrentEvent, toggleEventModal, setEvents } from '../../redux/actions/events'
+import { toggleTagEditModal } from '../../redux/actions/tags'
+import { emptyEvent } from '../../constants'
+import nanoid from 'nanoid'
 
 interface EventEditorProps {
   eventModalOpen: boolean
   isEdit: boolean
   currentEvent: EventType
-  handleTitleInput: React.ChangeEventHandler<
-    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-  >
-  handleClose: ((event: {}, reason: 'backdropClick' | 'escapeKeyDown') => void) | undefined
-  handleStartDateChange: (date: MaterialUiPickersDate | null, value?: string | null) => void
-  handleEndDateChange: (date: MaterialUiPickersDate | null, value?: string | null) => void
-  handleTextColorChange: (color: { hex: string }) => void
-  handleBgColorChange: (color: { hex: string }) => void
-  handleDelete: ReactClickEventHandleType
-  handleCancel: ReactClickEventHandleType
-  handleSaveEvent: ReactClickEventHandleType
   allTags: TagType[] | []
-  handleDeleteTag: (tag: TagType) => void
-  handleEditTag: (tag: TagType) => void
-  handleAddTag: () => void
-  handleTagChange: (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>,
-    child: React.ReactNode
-  ) => void
+  events: EventType[] | []
 }
 
-export default class EventEditor extends Component<EventEditorProps> {
+class EventEditor extends Component<EventEditorProps & DispatchProp> {
+  setCurrentEvent = (event: EventType) => {
+    this.props.dispatch(setCurrentEvent(event))
+  }
+
+  handleTitleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setCurrentEvent({ ...this.props.currentEvent, title: e.target.value })
+  }
+
+  handleCancel = () => {
+    this.handleModalClose()
+  }
+
+  handleModalClose = () => {
+    this.props.dispatch(toggleEventModal(false))
+    this.setCurrentEvent(emptyEvent)
+  }
+
+  handleAddTag = () => {
+    this.props.dispatch(toggleTagEditModal(true))
+  }
+
+  handleTagChange = (
+    e: React.ChangeEvent<{
+      name?: string | undefined
+      value: unknown
+    }>,
+    child: React.ReactNode
+  ) => {
+    if (e.target.value) {
+      const tag = this.props.allTags.find(t => t.id === e.target.value)
+      if (tag) {
+        this.setCurrentEvent({
+          ...this.props.currentEvent,
+          borderColor: tag.backgroundColor,
+          backgroundColor: tag.backgroundColor,
+          textColor: tag.textColor,
+          tagId: tag.id
+        })
+      }
+    }
+  }
+
+  handleStartDateChange = (date: MaterialUiPickersDate) => {
+    this.setCurrentEvent({ ...this.props.currentEvent, start: date })
+  }
+
+  handleEndDateChange = (date: MaterialUiPickersDate) => {
+    this.setCurrentEvent({ ...this.props.currentEvent, end: date })
+  }
+
+  handleTextColorChange = (e: { hex: string }) => {
+    this.setCurrentEvent({
+      ...this.props.currentEvent,
+      textColor: e.hex
+    })
+  }
+
+  handleBgColorChange = (e: { hex: string }) => {
+    this.setCurrentEvent({
+      ...this.props.currentEvent,
+      backgroundColor: e.hex,
+      borderColor: e.hex
+    })
+  }
+
+  handleDelete = () => {
+    this.props.dispatch(
+      setEvents(this.props.events.filter(event => event.id !== this.props.currentEvent.id))
+    )
+  }
+
+  editEvent = () => {
+    const events = (this.props.events as Array<EventType>).map(event => {
+      if (event.id !== this.props.currentEvent.id) {
+        return event
+      } else {
+        return this.props.currentEvent
+      }
+    })
+    this.props.dispatch(setEvents(events))
+  }
+
+  addEvent = () => {
+    const eventId = nanoid(8)
+    const _currentEvent = {
+      ...this.props.currentEvent,
+      id: eventId
+    }
+    this.props.dispatch(setEvents([...this.props.events, _currentEvent]))
+  }
+
+  handleSaveEvent = () => {
+    this.props.isEdit ? this.editEvent() : this.addEvent()
+    this.handleModalClose()
+    setCurrentEvent(emptyEvent)
+  }
+
   render() {
-    const {
-      eventModalOpen,
-      handleClose,
-      isEdit,
-      currentEvent,
-      handleTitleInput,
-      handleStartDateChange,
-      handleEndDateChange,
-      handleTextColorChange,
-      handleBgColorChange,
-      handleDelete,
-      handleCancel,
-      handleSaveEvent,
-      allTags,
-      handleDeleteTag,
-      handleEditTag,
-      handleAddTag,
-      handleTagChange
-    } = this.props
+    const { eventModalOpen, isEdit, currentEvent, allTags } = this.props
     return (
       <Dialog
         open={eventModalOpen}
-        onClose={handleClose}
+        onClose={this.handleModalClose}
         aria-labelledby='form-dialog-title'
         maxWidth='sm'
         fullWidth
@@ -84,7 +152,7 @@ export default class EventEditor extends Component<EventEditorProps> {
             fullWidth
             placeholder='请输入日程内容'
             value={currentEvent.title}
-            onChange={handleTitleInput}
+            onChange={this.handleTitleInput}
           />
           <MuiPickersUtilsProvider utils={DateFnsUtils} locale={zhCNLocale}>
             <Grid container justify='space-between' spacing={3}>
@@ -98,7 +166,7 @@ export default class EventEditor extends Component<EventEditorProps> {
                   variant='inline'
                   label='开始时间'
                   value={currentEvent.start}
-                  onChange={handleStartDateChange}
+                  onChange={this.handleStartDateChange}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -111,7 +179,7 @@ export default class EventEditor extends Component<EventEditorProps> {
                   variant='inline'
                   label='结束时间'
                   value={currentEvent.end}
-                  onChange={handleEndDateChange}
+                  onChange={this.handleEndDateChange}
                 />
               </Grid>
             </Grid>
@@ -119,7 +187,7 @@ export default class EventEditor extends Component<EventEditorProps> {
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 文字 </div>
             <GColorPicker
-              onChange={handleTextColorChange}
+              onChange={this.handleTextColorChange}
               color={currentEvent.textColor}
               containerStyle={{ padding: '8px 0' }}
             />
@@ -127,14 +195,14 @@ export default class EventEditor extends Component<EventEditorProps> {
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 背景 </div>
             <GColorPicker
-              onChange={handleBgColorChange}
+              onChange={this.handleBgColorChange}
               color={currentEvent.backgroundColor}
               containerStyle={{ padding: '8px 0' }}
             />
           </div>
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 标签 </div>
-            <Select value={currentEvent.tagId} onChange={handleTagChange}>
+            <Select value={currentEvent.tagId} onChange={this.handleTagChange}>
               <MenuItem value=''>
                 <em>无</em>
               </MenuItem>
@@ -148,7 +216,7 @@ export default class EventEditor extends Component<EventEditorProps> {
             <div className='tags-wrapper'>
               <Tags />
               <IconButton
-                onClick={handleAddTag}
+                onClick={this.handleAddTag}
                 aria-label='delete'
                 size='small'
                 style={{
@@ -161,15 +229,15 @@ export default class EventEditor extends Component<EventEditorProps> {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color='primary'>
+          <Button onClick={this.handleCancel} color='primary'>
             取消
           </Button>
           {currentEvent.id && (
-            <Button onClick={handleDelete} color='secondary'>
+            <Button onClick={this.handleDelete} color='secondary'>
               删除
             </Button>
           )}
-          <Button onClick={handleSaveEvent} color='primary'>
+          <Button onClick={this.handleSaveEvent} color='primary'>
             保存
           </Button>
         </DialogActions>
@@ -177,3 +245,15 @@ export default class EventEditor extends Component<EventEditorProps> {
     )
   }
 }
+
+const mapStateToProps = (state: StoreStateType) => {
+  return {
+    eventModalOpen: state.events.eventEditModalOpen,
+    currentEvent: state.events.currentEvent,
+    isEdit: !!state.events.currentEvent.id,
+    allTags: state.tags.tags,
+    events: state.events.events
+  }
+}
+
+export default connect(mapStateToProps)(EventEditor)

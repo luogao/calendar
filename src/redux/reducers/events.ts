@@ -1,6 +1,6 @@
 import { EVENT_ACITON_TYPE } from "../actionTypes";
 import { EventType } from "../../types";
-import { CALENDAR_STORE_KEY } from "../../constants";
+import { CALENDAR_STORE_KEY, emptyEvent } from "../../constants";
 
 
 const storeEvent = localStorage.getItem(CALENDAR_STORE_KEY)
@@ -9,12 +9,16 @@ export interface EventStateType {
   events: EventType[] | []
   selectedEvent: EventType | null
   currentViewEvents: EventType[] | []
+  currentEvent: EventType
+  eventEditModalOpen: boolean
 }
 
 const initialState: EventStateType = {
   events: storeEvent ? JSON.parse(storeEvent) : [],
   currentViewEvents: [],
-  selectedEvent: null
+  selectedEvent: null,
+  currentEvent: emptyEvent,
+  eventEditModalOpen: false
 };
 
 type EventAction =
@@ -22,6 +26,8 @@ type EventAction =
   | { type: EVENT_ACITON_TYPE.SET, payload: { events: EventType[] | [] } }
   | { type: EVENT_ACITON_TYPE.SET_CURRENT_EVENTS, payload: { currentViewEvents: EventType[] | [] } }
   | { type: EVENT_ACITON_TYPE.SET_SELECTED_EVENT, payload: { selectedEvent: EventType | null } }
+  | { type: EVENT_ACITON_TYPE.SET_CURRENT_EVENT, payload: { event: EventType } }
+  | { type: EVENT_ACITON_TYPE.TOGGLE_EVENT_MODAL, payload: { toggle: boolean } }
 
 
 export default function (state = initialState, action: EventAction) {
@@ -56,6 +62,20 @@ export default function (state = initialState, action: EventAction) {
       return {
         ...state,
         selectedEvent
+      };
+    }
+    case EVENT_ACITON_TYPE.SET_CURRENT_EVENT: {
+      const { event } = action.payload;
+      return {
+        ...state,
+        currentEvent: event
+      };
+    }
+    case EVENT_ACITON_TYPE.TOGGLE_EVENT_MODAL: {
+      const { toggle } = action.payload;
+      return {
+        ...state,
+        eventEditModalOpen: toggle
       };
     }
     default:

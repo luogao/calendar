@@ -1,14 +1,8 @@
 import { TagType } from "../../types";
 import { TAG_ACTION_TYPE } from "../actionTypes";
-import { CALENDAR_STORE_TAG_KEY } from "../../constants";
+import { CALENDAR_STORE_TAG_KEY, emptyTag } from "../../constants";
 
 
-const emptyTag = {
-  backgroundColor: '#000000',
-  textColor: '#ffffff',
-  title: '',
-  id: ''
-}
 
 export interface TagStateType {
   tags: TagType[] | []
@@ -22,7 +16,7 @@ type TagActionsType =
   | { type: TAG_ACTION_TYPE.SET_SELECTED_TAGS, payload: { selectedTagsId: string[] | [] } }
   | { type: TAG_ACTION_TYPE.SET_CURRENT_TAG, payload: { currentTag: TagType } }
   | { type: TAG_ACTION_TYPE.SET_DEFAULT_CURRENT_TAG }
-  | { type: TAG_ACTION_TYPE.TOGGLE_MODAL, payload: { toggle: boolean } }
+  | { type: TAG_ACTION_TYPE.TOGGLE_TAG_MODAL, payload: { toggle: boolean } }
 
 const storeTags = localStorage.getItem(CALENDAR_STORE_TAG_KEY)
 
@@ -45,9 +39,10 @@ export default function (state = initialState, actions: TagActionsType) {
     }
     case TAG_ACTION_TYPE.SET_SELECTED_TAGS: {
       const { selectedTagsId } = actions.payload
+      const selectedTags = selectedTagsId.length === 0 ? [] : state.tags.filter((tag: TagType) => (selectedTagsId as Array<string>).includes(tag.id))
       return {
         ...state,
-        selectedTags: selectedTagsId.length === 0 ? [] : state.tags.filter((tag: TagType) => (selectedTagsId as Array<string>).includes(tag.id))
+        selectedTags: selectedTags
       }
     }
     case TAG_ACTION_TYPE.SET_CURRENT_TAG: {
@@ -63,7 +58,7 @@ export default function (state = initialState, actions: TagActionsType) {
         currentTag: emptyTag
       }
     }
-    case TAG_ACTION_TYPE.TOGGLE_MODAL: {
+    case TAG_ACTION_TYPE.TOGGLE_TAG_MODAL: {
       return {
         ...state,
         tagEditModalOpen: actions.payload.toggle

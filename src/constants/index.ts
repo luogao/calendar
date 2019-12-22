@@ -25,3 +25,22 @@ export const zhCnLocale = {
   },
   noEventsMessage: '没有事件显示'
 }
+
+export const emptyEvent = {
+  id: '',
+  title: '无标题',
+  start: new Date(),
+  end: new Date(),
+  backgroundColor: '#000000',
+  borderColor: '#000000',
+  textColor: '#ffffff',
+  allDay: true,
+  tagId: ''
+}
+
+export const emptyTag = {
+  backgroundColor: '#000000',
+  textColor: '#ffffff',
+  title: '',
+  id: ''
+}

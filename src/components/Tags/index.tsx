@@ -101,15 +101,8 @@ class index extends PureComponent<TagsProps & DispatchProp, TagsState> {
 }
 
 const mapStateToProps = (state: StoreStateType) => {
-  const currentEventsTags = (state.events.currentViewEvents as Array<EventType>).map(
-    event => event.tagId
-  )
-  const selectedTags = (state.tags.tags as Array<TagType>).filter(tag =>
-    currentEventsTags.includes(tag.id)
-  )
-
   return {
-    selectedTags,
+    selectedTags: state.tags.selectedTags,
     tags: state.tags.tags
   }
 }

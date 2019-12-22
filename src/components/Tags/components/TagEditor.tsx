@@ -17,6 +17,7 @@ import {
   setTags
 } from '../../../redux/actions/tags'
 import { StoreStateType } from '../../../redux/reducers'
+import nanoid from 'nanoid'
 
 interface TagEditorProps {
   tags: TagType[] | []
@@ -28,17 +29,16 @@ interface TagEditorProps {
 class TagEditor extends Component<TagEditorProps & DispatchProp> {
   handleDelete = () => {
     this.props.dispatch(setTags(this.props.tags.filter(tag => tag.id !== this.props.currentTag.id)))
-    this.props.dispatch(setDefaultCurrentTag())
     this.handleCloseModal()
   }
 
   handleCancel = () => {
-    this.props.dispatch(setDefaultCurrentTag())
     this.handleCloseModal()
   }
 
   handleCloseModal = () => {
     this.props.dispatch(toggleTagEditModal(false))
+    this.props.dispatch(setDefaultCurrentTag())
   }
 
   setCurrentTag = (tag: TagType) => {
@@ -70,7 +70,7 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
   }
 
   createTag = () => {
-    this.props.dispatch(setTags([...this.props.tags, this.props.currentTag]))
+    this.props.dispatch(setTags([...this.props.tags, {...this.props.currentTag, id: nanoid(8)}]))
   }
 
   handleSave = () => {

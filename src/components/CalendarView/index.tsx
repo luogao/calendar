@@ -9,7 +9,12 @@ import { connect, DispatchProp } from 'react-redux'
 import { StoreStateType } from '../../redux/reducers'
 import { getTimestampByDate } from '../../utils'
 import { zhCnLocale } from '../../constants'
-import { setEvents, setCurrentViewEvents } from '../../redux/actions/events'
+import {
+  setEvents,
+  setCurrentViewEvents,
+  setCurrentEvent,
+  toggleEventModal
+} from '../../redux/actions/events'
 import { setSelectedTags } from '../../redux/actions/tags'
 
 export interface CalendarEventSelectArgType {
@@ -57,11 +62,7 @@ export interface CalendarDatesRenderArgType {
 
 interface CalendarViewProps {
   events: EventType[] | []
-  // handleEventClick: (arg: CalendarEventClickArgType) => boolean | void
-
-  // handleDateClick: (arg: CalendarDateClickArgType) => void
-
-  // handleSelect: (arg: CalendarEventSelectArgType) => void
+  currentEvent: EventType
 }
 
 class CalendarView extends Component<CalendarViewProps & DispatchProp> {
@@ -103,20 +104,48 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
     this.props.dispatch(setCurrentViewEvents(currentViewEvents))
   }
 
-  handleSelect = (e: CalendarEventSelectArgType) => {
-    console.log(e)
+  handleOpenEventModal = () => {
+    this.props.dispatch(toggleEventModal(true))
   }
 
-  handleDateClick = (e: CalendarDateClickArgType) => {
-    console.log(e)
+  handleSelect = (e: CalendarEventSelectArgType) => {
+    const { end, start } = e
+    this.props.dispatch(setCurrentEvent({ ...this.props.currentEvent, end, start }))
+    this.handleOpenEventModal()
   }
+
+  handleDateClick = (e: CalendarDateClickArgType) => {}
 
   handleEventClick = (e: CalendarEventClickArgType) => {
-    console.log(e)
+    const {
+      title,
+      start,
+      end,
+      backgroundColor,
+      borderColor,
+      textColor,
+      id,
+      allDay,
+      extendedProps: { tagId = '' }
+    } = e.event
+    this.props.dispatch(
+      setCurrentEvent({
+        title,
+        start,
+        end,
+        backgroundColor,
+        borderColor,
+        textColor,
+        id,
+        allDay,
+        tagId
+      })
+    )
+    this.handleOpenEventModal()
   }
 
   render() {
-    console.log('CalendarView render', this.props)
+    console.log('CalendarView render')
     const { events } = this.props
     return (
       <FullCalendar
@@ -142,11 +171,16 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
       />
     )
   }
+
+  shouldComponentUpdate(nextProps: CalendarViewProps) {
+    return !_.isEqual(nextProps.events, this.props.events)
+  }
 }
 
 const mapStateToProps = (state: StoreStateType) => {
   return {
-    events: state.events.events
+    events: state.events.events,
+    currentEvent: state.events.currentEvent
   }
 }
 
