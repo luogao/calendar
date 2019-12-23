@@ -20,6 +20,7 @@ import { StoreStateType } from '../../../redux/reducers'
 import nanoid from 'nanoid'
 import { setEvents } from '../../../redux/actions/events'
 import _ from 'lodash'
+import { updateArrayItem } from '../../../utils'
 interface TagEditorProps {
   tags: TagType[] | []
   events: EventType[] | []
@@ -76,20 +77,13 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
   }
 
   updateTag = () => {
-    const tags = (this.props.tags as Array<TagType>).map(tag => {
-      if (tag.id !== this.props.currentTag.id) {
-        return tag
-      } else {
-        return this.props.currentTag
-      }
-    })
-
+    const tags = updateArrayItem<TagType, 'id'>(this.props.tags, this.props.currentTag, 'id')
     this.props.dispatch(setTags(tags))
     this.syncRelatedEvent()
   }
 
   createTag = () => {
-    this.props.dispatch(setTags([...this.props.tags, { ...this.props.currentTag, id: nanoid(8) }]))
+    this.props.dispatch(setTags([ ...this.props.tags, { ...this.props.currentTag, id: nanoid(8) } ]))
   }
 
   handleSave = () => {
@@ -101,17 +95,17 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
     this.handleCloseModal()
   }
 
-  render() {
+  render () {
     const { modalOpen, isEdit, currentTag } = this.props
     return (
       <Dialog
-        open={modalOpen}
-        onClose={this.handleCloseModal}
+        open={ modalOpen }
+        onClose={ this.handleCloseModal }
         aria-labelledby='form-dialog-title'
         maxWidth='sm'
         fullWidth
       >
-        <DialogTitle id='form-dialog-title'>{isEdit ? '编辑标签' : '新建标签'}</DialogTitle>
+        <DialogTitle id='form-dialog-title'>{ isEdit ? '编辑标签' : '新建标签' }</DialogTitle>
         <DialogContent>
           <TextField
             multiline
@@ -120,36 +114,36 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
             label='标签内容'
             fullWidth
             placeholder='请输入标签内容'
-            value={currentTag.title}
-            onInput={this.handleTitleChange}
+            value={ currentTag.title }
+            onInput={ this.handleTitleChange }
           />
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 文字 </div>
             <GColorPicker
-              onChange={this.handleTextColorChange}
-              color={currentTag.textColor}
-              containerStyle={{ padding: '8px 0' }}
+              onChange={ this.handleTextColorChange }
+              color={ currentTag.textColor }
+              containerStyle={ { padding: '8px 0' } }
             />
           </div>
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 背景 </div>
             <GColorPicker
-              onChange={this.handleBgChange}
-              color={currentTag.backgroundColor}
-              containerStyle={{ padding: '8px 0' }}
+              onChange={ this.handleBgChange }
+              color={ currentTag.backgroundColor }
+              containerStyle={ { padding: '8px 0' } }
             />
           </div>
         </DialogContent>
         <DialogActions>
-          {currentTag.id && (
-            <Button onClick={this.handleDelete} color='secondary'>
+          { currentTag.id && (
+            <Button onClick={ this.handleDelete } color='secondary'>
               删除
             </Button>
-          )}
-          <Button onClick={this.handleCancel} color='primary'>
+          ) }
+          <Button onClick={ this.handleCancel } color='primary'>
             取消
           </Button>
-          <Button onClick={this.handleSave} color='primary'>
+          <Button onClick={ this.handleSave } color='primary'>
             保存
           </Button>
         </DialogActions>
@@ -157,7 +151,7 @@ class TagEditor extends Component<TagEditorProps & DispatchProp> {
     )
   }
 
-  shouldComponentUpdate(nextProps: TagEditorProps) {
+  shouldComponentUpdate (nextProps: TagEditorProps) {
     return (
       !_.isEqual(nextProps.currentTag, this.props.currentTag) ||
       nextProps.isEdit !== this.props.isEdit ||

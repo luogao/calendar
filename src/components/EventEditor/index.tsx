@@ -17,7 +17,7 @@ import AddIcon from '@material-ui/icons/Add'
 import zhCNLocale from 'date-fns/locale/zh-CN'
 import Tags from '../Tags'
 import GColorPicker from '../GColorPicker'
-import { EventType, TagType, ReactClickEventHandleType } from '../../types'
+import { EventType, TagType } from '../../types'
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import { connect, DispatchProp } from 'react-redux'
 import { StoreStateType } from '../../redux/reducers'
@@ -25,6 +25,7 @@ import { setCurrentEvent, toggleEventModal, setEvents } from '../../redux/action
 import { toggleTagEditModal, setCurrentTag, setTags } from '../../redux/actions/tags'
 import { emptyEvent, emptyTag } from '../../constants'
 import nanoid from 'nanoid'
+import { updateArrayItem } from '../../utils'
 
 interface EventEditorProps {
   eventModalOpen: boolean
@@ -66,7 +67,6 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
     }>,
     child: React.ReactNode
   ) => {
-    console.log({ '222': e.target.value })
     if (e.target.value) {
       const tag = this.props.allTags.find(t => t.id === e.target.value)
       if (tag) {
@@ -121,13 +121,7 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
   }
 
   editEvent = () => {
-    const events = (this.props.events as Array<EventType>).map(event => {
-      if (event.id !== this.props.currentEvent.id) {
-        return event
-      } else {
-        return this.props.currentEvent
-      }
-    })
+    const events = updateArrayItem<EventType, 'id'>(this.props.events, this.props.currentEvent, 'id')
     this.props.dispatch(setEvents(events))
   }
 
@@ -137,18 +131,12 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
       ...this.props.currentEvent,
       id: eventId
     }
-    this.props.dispatch(setEvents([...this.props.events, _currentEvent]))
+    this.props.dispatch(setEvents([ ...this.props.events, _currentEvent ]))
   }
 
   syncTagChange = () => {
     if (this.props.currentTag.id) {
-      const tags = (this.props.allTags as Array<TagType>).map((tag: TagType) => {
-        if (tag.id !== this.props.currentTag.id) {
-          return tag
-        } else {
-          return this.props.currentTag
-        }
-      })
+      const tags = updateArrayItem<TagType, 'id'>(this.props.allTags, this.props.currentTag, 'id')
       this.props.dispatch(setTags(tags))
     }
   }
@@ -159,17 +147,17 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
     this.handleModalClose()
   }
 
-  render() {
+  render () {
     const { eventModalOpen, isEdit, currentEvent, allTags } = this.props
     return (
       <Dialog
-        open={eventModalOpen}
-        onClose={this.handleModalClose}
+        open={ eventModalOpen }
+        onClose={ this.handleModalClose }
         aria-labelledby='form-dialog-title'
         maxWidth='sm'
         fullWidth
       >
-        <DialogTitle id='form-dialog-title'>{isEdit ? '编辑日程' : '新建日程'}</DialogTitle>
+        <DialogTitle id='form-dialog-title'>{ isEdit ? '编辑日程' : '新建日程' }</DialogTitle>
         <DialogContent>
           <TextField
             multiline
@@ -178,12 +166,12 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
             label='日程内容'
             fullWidth
             placeholder='请输入日程内容'
-            value={currentEvent.title}
-            onChange={this.handleTitleInput}
+            value={ currentEvent.title }
+            onChange={ this.handleTitleInput }
           />
-          <MuiPickersUtilsProvider utils={DateFnsUtils} locale={zhCNLocale}>
-            <Grid container justify='space-between' spacing={3}>
-              <Grid item xs={6}>
+          <MuiPickersUtilsProvider utils={ DateFnsUtils } locale={ zhCNLocale }>
+            <Grid container justify='space-between' spacing={ 3 }>
+              <Grid item xs={ 6 }>
                 <KeyboardDatePicker
                   autoOk
                   fullWidth
@@ -192,13 +180,13 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
                   disableToolbar
                   variant='inline'
                   label='开始时间'
-                  value={currentEvent.start}
-                  onChange={this.handleStartDateChange}
+                  value={ currentEvent.start }
+                  onChange={ this.handleStartDateChange }
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={ 6 }>
                 <KeyboardDatePicker
-                  minDate={currentEvent.start}
+                  minDate={ currentEvent.start }
                   autoOk
                   fullWidth
                   format='yyyy-MM-dd'
@@ -206,8 +194,8 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
                   disableToolbar
                   variant='inline'
                   label='结束时间'
-                  value={currentEvent.end}
-                  onChange={this.handleEndDateChange}
+                  value={ currentEvent.end }
+                  onChange={ this.handleEndDateChange }
                 />
               </Grid>
             </Grid>
@@ -215,41 +203,41 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 文字 </div>
             <GColorPicker
-              onChange={this.handleTextColorChange}
-              color={currentEvent.textColor}
-              containerStyle={{ padding: '8px 0' }}
+              onChange={ this.handleTextColorChange }
+              color={ currentEvent.textColor }
+              containerStyle={ { padding: '8px 0' } }
             />
           </div>
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'> 背景 </div>
             <GColorPicker
-              onChange={this.handleBgColorChange}
-              color={currentEvent.backgroundColor}
-              containerStyle={{ padding: '8px 0' }}
+              onChange={ this.handleBgColorChange }
+              color={ currentEvent.backgroundColor }
+              containerStyle={ { padding: '8px 0' } }
             />
           </div>
           <div className='color-picker-wrapper'>
             <div className='color-picker-label'>
-              标签 {currentEvent.tagId ? '' : '「 请点击下拉框选择 」'}{' '}
+              标签 { currentEvent.tagId ? '' : '「 请点击下拉框选择 」' }{ ' ' }
             </div>
-            <Select value={currentEvent.tagId} onChange={this.handleTagChange}>
+            <Select value={ currentEvent.tagId } onChange={ this.handleTagChange }>
               <MenuItem value=''> 无 </MenuItem>
-              {allTags.length > 0 &&
+              { allTags.length > 0 &&
                 (allTags as Array<TagType>).map((el: TagType) => (
-                  <MenuItem value={el.id} key={el.id}>
-                    {el.title}
+                  <MenuItem value={ el.id } key={ el.id }>
+                    { el.title }
                   </MenuItem>
-                ))}
+                )) }
             </Select>
             <div className='tags-wrapper'>
               <Tags />
               <IconButton
-                onClick={this.handleAddTag}
+                onClick={ this.handleAddTag }
                 aria-label='delete'
                 size='small'
-                style={{
+                style={ {
                   margin: '6px 0 7px'
-                }}
+                } }
               >
                 <AddIcon />
               </IconButton>
@@ -257,15 +245,15 @@ class EventEditor extends Component<EventEditorProps & DispatchProp> {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.handleCancel} color='primary'>
+          <Button onClick={ this.handleCancel } color='primary'>
             取消
           </Button>
-          {currentEvent.id && (
-            <Button onClick={this.handleDelete} color='secondary'>
+          { currentEvent.id && (
+            <Button onClick={ this.handleDelete } color='secondary'>
               删除
             </Button>
-          )}
-          <Button onClick={this.handleSaveEvent} color='primary'>
+          ) }
+          <Button onClick={ this.handleSaveEvent } color='primary'>
             保存
           </Button>
         </DialogActions>

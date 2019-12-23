@@ -39,3 +39,17 @@ export const downloadFile = (fileName: string, content: string) => {
 export function getTimestampByDate (date: Date) {
   return new Date(date).getTime()
 }
+
+export function updateArrayItem<T, K extends keyof T> (arr: T[], newItem: T, key: K) {
+  console.log('updateArrayItem')
+  return arr.map((item: T) => {
+    if (item[ key ] !== newItem[ key ]) {
+      return item
+    } else {
+      return {
+        ...item,
+        ...newItem
+      }
+    }
+  })
+}
