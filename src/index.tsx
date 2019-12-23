@@ -8,11 +8,11 @@ import store from './redux'
 import _ from 'lodash'
 import { setSelectedTags } from './redux/actions/tags'
 import { StoreStateType } from './redux/reducers'
-import { EventType, TagType } from './types'
+import { EventType } from './types'
 import { getTimestampByDate } from './utils'
 
 let currentValue: StoreStateType | null = null
-function handleChange() {
+function handleChange () {
   let previousValue = currentValue
   currentValue = store.getState()
   if (!_.isEqual(previousValue, currentValue) && currentValue) {
@@ -32,17 +32,14 @@ function handleChange() {
         .filter(event => event.tagId !== '')
         .map(event => event.tagId)
     )
-    const selectedTags = (currentValue.tags.tags as Array<TagType>).filter(tag =>
-      currentEventsTags.includes(tag.id)
-    )
     store.dispatch(setSelectedTags(currentEventsTags))
   }
 }
 const unsubscribe = store.subscribe(handleChange)
 
 ReactDOM.render(
-  <Provider store={store}>
-    <App removeStoreSub={unsubscribe} />
+  <Provider store={ store }>
+    <App removeStoreSub={ unsubscribe } />
   </Provider>,
   document.getElementById('root')
 )

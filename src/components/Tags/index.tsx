@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Chip } from '@material-ui/core'
 import styled from 'styled-components'
-import { TagType, EventType } from '../../types'
+import { TagType } from '../../types'
 import { DispatchProp, connect } from 'react-redux'
 import { setTags, setCurrentTag, toggleTagEditModal } from '../../redux/actions/tags'
 import { StoreStateType } from '../../redux/reducers'
