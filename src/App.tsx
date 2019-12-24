@@ -16,6 +16,7 @@ import CalendarView from './components/CalendarView'
 import { getImgSrc, generate, downloadFile } from './utils'
 import { connect, DispatchProp } from 'react-redux'
 import { setEvents } from './redux/actions/events'
+import SnowflakeBG from './components/SnowflakeBG/SnowflakeBG'
 
 interface AppState {
   deleteConfirmDialogOpen: boolean
@@ -40,7 +41,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     if (mainTarget) {
       html2canvas(mainTarget, {
         ignoreElements: el => el.className === 'fc-right' || el.className === 'action-btns'
-      }).then(function(canvas: HTMLCanvasElement) {
+      }).then(function (canvas: HTMLCanvasElement) {
         downloadFile(generate(), getImgSrc(canvas))
       })
     }
@@ -60,11 +61,11 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     this.setDleteConfirmDialogOpen(true)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.removeStoreSub()
   }
 
-  render() {
+  render () {
     return (
       <div className='App'>
         <main>
@@ -78,11 +79,11 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
               <Tags isDisplay />
             </div>
             <div className='action-btns'>
-              <Button onClick={this.handleSave} variant='contained' color='primary' fullWidth>
+              <Button onClick={ this.handleSave } variant='contained' color='primary' fullWidth>
                 保存
               </Button>
               <Button
-                onClick={this.handleDeleteAllPress}
+                onClick={ this.handleDeleteAllPress }
                 variant='contained'
                 color='secondary'
                 fullWidth
@@ -95,8 +96,8 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
         <EventEditor />
         <TagEditor />
         <Dialog
-          open={this.state.deleteConfirmDialogOpen}
-          onClose={this.handleDeleteConfirmClose}
+          open={ this.state.deleteConfirmDialogOpen }
+          onClose={ this.handleDeleteConfirmClose }
           aria-labelledby='alert-dialog-title'
           aria-describedby='alert-dialog-description'
         >
@@ -107,14 +108,15 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleDeleteConfirmClose} color='primary'>
+            <Button onClick={ this.handleDeleteConfirmClose } color='primary'>
               取消
             </Button>
-            <Button onClick={this.handleDeleteAll} color='default' autoFocus>
+            <Button onClick={ this.handleDeleteAll } color='default' autoFocus>
               确认
             </Button>
           </DialogActions>
         </Dialog>
+        <SnowflakeBG />
       </div>
     )
   }
