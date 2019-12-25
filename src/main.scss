@@ -70,6 +70,8 @@ main {
   display: flex;
   height: 100vh;
   flex-direction: row;
+  position: relative;
+  z-index: 999;
   .side-bar {
     width: 200px;
     height: 100vh;

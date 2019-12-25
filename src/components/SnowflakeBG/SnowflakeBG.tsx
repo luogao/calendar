@@ -44,7 +44,7 @@ class SnowflakeBG extends PureComponent<SnowflakeBGProps, SnowflakeBGState> {
     this.material = new THREE.SpriteMaterial({ map: this.map })
 
     for (let i = 0; i < this.amount; i++) {
-      const particle = new THREE.Sprite(this.material)
+      const particle: THREE.Sprite & any = new THREE.Sprite(this.material)
       const randomScale = randomRange(10, 20)
 
       particle.position.x = randomRange(-1000, 1000)
@@ -108,13 +108,17 @@ class SnowflakeBG extends PureComponent<SnowflakeBGProps, SnowflakeBGState> {
   }
 
   render () {
-    return <div ref={ this.container } style={ {
+    return <div id="snowflake-bg" ref={ this.container } style={ {
       position: 'fixed',
       top: 0,
       left: 0,
       bottom: 0,
-      right: 0
-    } }></div>;
+      right: 0,
+      opacity: 0.5
+    } }>
+      <h1>Merry Christmas</h1>
+
+    </div>;
   }
 }
 

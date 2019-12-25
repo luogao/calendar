@@ -40,7 +40,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     const mainTarget = document.querySelector('main')
     if (mainTarget) {
       html2canvas(mainTarget, {
-        ignoreElements: el => el.className === 'fc-right' || el.className === 'action-btns'
+        ignoreElements: el => el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg'
       }).then(function (canvas: HTMLCanvasElement) {
         downloadFile(generate(), getImgSrc(canvas))
       })
@@ -66,6 +66,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
   }
 
   render () {
+    const isChristmas = new Date().toLocaleDateString() === '2019/12/25'
     return (
       <div className='App'>
         <main>
@@ -116,7 +117,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             </Button>
           </DialogActions>
         </Dialog>
-        <SnowflakeBG />
+        { isChristmas && <SnowflakeBG /> }
       </div>
     )
   }
