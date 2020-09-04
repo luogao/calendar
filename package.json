@@ -26,7 +26,7 @@
     "html2canvas": "^1.0.0-rc.3",
     "lodash": "^4.17.15",
     "nanoid": "^2.0.3",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "react": "^16.8.6",
     "react-color": "^2.17.3",
     "react-dom": "^16.8.6",
