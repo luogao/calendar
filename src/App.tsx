@@ -8,7 +8,7 @@ import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import { DialogContentText } from '@material-ui/core'
+import { DialogContentText, Switch } from '@material-ui/core'
 import EventEditor from './components/EventEditor'
 import TagEditor from './components/Tags/components/TagEditor'
 import Tags from './components/Tags'
@@ -22,6 +22,7 @@ import { ChristmasIcons } from './constants'
 
 interface AppState {
   deleteConfirmDialogOpen: boolean
+  withAnimation: boolean
 }
 
 interface AppProps {
@@ -30,10 +31,12 @@ interface AppProps {
 
 class App extends React.Component<AppProps & DispatchProp, AppState> {
   componentDidMount() {
-    this.isChristmas() && clickShowIconPopUp(ChristmasIcons)
+    this.isChristmas() && clickShowIconPopUp(ChristmasIcons, !this.state.withAnimation)
   }
+
   state = {
     deleteConfirmDialogOpen: false,
+    withAnimation: true,
   }
 
   handleDeleteAll = () => {
@@ -46,7 +49,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     if (mainTarget) {
       html2canvas(mainTarget, {
         ignoreElements: (el) =>
-          el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg',
+          el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg' || el.className === 'snowflake-control',
       }).then(function (canvas: HTMLCanvasElement) {
         downloadFile(generate(), getImgSrc(canvas))
       })
@@ -76,6 +79,12 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     return today.includes('/12/24') || today.includes('/12/25')
   }
 
+  handleSwitch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      withAnimation: event.target.checked,
+    })
+  }
+
   render() {
     return (
       <div className='App'>
@@ -84,6 +93,18 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             <div className='calendar-wrapper'>
               <CalendarView />
             </div>
+            {this.isChristmas && (
+              <div className='snowflake-control'>
+                <span>{this.state.withAnimation ? '隐藏雪花' : '想看下雪'}</span>
+                <Switch
+                  checked={this.state.withAnimation}
+                  onChange={this.handleSwitch}
+                  color='primary'
+                  name='openAnimation'
+                  size='small'
+                />
+              </div>
+            )}
           </div>
           <div className='side-bar'>
             <div className='tags-wrapper'>
@@ -127,7 +148,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             </Button>
           </DialogActions>
         </Dialog>
-        {this.isChristmas() && <SnowflakeBG />}
+        {this.isChristmas() && this.state.withAnimation && <SnowflakeBG />}
       </div>
     )
   }

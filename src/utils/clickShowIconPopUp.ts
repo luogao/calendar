@@ -1,10 +1,11 @@
-function clickShowIconPopUp (arr: string[]) {
+function clickShowIconPopUp (arr: string[], disabled?: boolean) {
   // arr参数是必须的
   if (!arr || !arr.length) {
     return;
   }
 
   document.documentElement.addEventListener('click', function (event) {
+    if (disabled) return
     // 主逻辑
     let index = Math.floor(Math.random() * arr.length);
     const x = event.pageX, y = event.pageY;

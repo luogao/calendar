@@ -60,6 +60,14 @@
     opacity: 1;
   }
   100% {
-    transform: translate3d(0,50px,0);
+    transform: translate3d(0, 50px, 0);
   }
+}
+
+.snowflake-control {
+  display: flex;
+  align-items: center;
+  padding-left: 2em;
+  font-size: 13px;
+  color: #73787d;
 }
