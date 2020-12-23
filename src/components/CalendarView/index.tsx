@@ -134,7 +134,6 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
   }
 
   render() {
-    console.log('CalendarView render')
     const { events } = this.props
     return (
       <FullCalendar

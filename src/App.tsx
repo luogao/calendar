@@ -17,6 +17,8 @@ import { getImgSrc, generate, downloadFile } from './utils'
 import { connect, DispatchProp } from 'react-redux'
 import { setEvents } from './redux/actions/events'
 import SnowflakeBG from './components/SnowflakeBG/SnowflakeBG'
+import clickShowIconPopUp from './utils/clickShowIconPopUp'
+import { ChristmasIcons } from './constants'
 
 interface AppState {
   deleteConfirmDialogOpen: boolean
@@ -27,8 +29,11 @@ interface AppProps {
 }
 
 class App extends React.Component<AppProps & DispatchProp, AppState> {
+  componentDidMount() {
+    this.isChristmas() && clickShowIconPopUp(ChristmasIcons)
+  }
   state = {
-    deleteConfirmDialogOpen: false
+    deleteConfirmDialogOpen: false,
   }
 
   handleDeleteAll = () => {
@@ -40,7 +45,8 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     const mainTarget = document.querySelector('main')
     if (mainTarget) {
       html2canvas(mainTarget, {
-        ignoreElements: el => el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg'
+        ignoreElements: (el) =>
+          el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg',
       }).then(function (canvas: HTMLCanvasElement) {
         downloadFile(generate(), getImgSrc(canvas))
       })
@@ -49,7 +55,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
 
   setDleteConfirmDialogOpen = (open: boolean) => {
     this.setState({
-      deleteConfirmDialogOpen: open
+      deleteConfirmDialogOpen: open,
     })
   }
 
@@ -61,12 +67,16 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     this.setDleteConfirmDialogOpen(true)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.removeStoreSub()
   }
 
-  render () {
-    const isChristmas = new Date().toLocaleDateString() === '2019/12/25'
+  isChristmas = () => {
+    const today = new Date().toLocaleDateString()
+    return today.includes('/12/24') || today.includes('/12/25')
+  }
+
+  render() {
     return (
       <div className='App'>
         <main>
@@ -80,11 +90,11 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
               <Tags isDisplay />
             </div>
             <div className='action-btns'>
-              <Button onClick={ this.handleSave } variant='contained' color='primary' fullWidth>
+              <Button onClick={this.handleSave} variant='contained' color='primary' fullWidth>
                 保存
               </Button>
               <Button
-                onClick={ this.handleDeleteAllPress }
+                onClick={this.handleDeleteAllPress}
                 variant='contained'
                 color='secondary'
                 fullWidth
@@ -97,8 +107,8 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
         <EventEditor />
         <TagEditor />
         <Dialog
-          open={ this.state.deleteConfirmDialogOpen }
-          onClose={ this.handleDeleteConfirmClose }
+          open={this.state.deleteConfirmDialogOpen}
+          onClose={this.handleDeleteConfirmClose}
           aria-labelledby='alert-dialog-title'
           aria-describedby='alert-dialog-description'
         >
@@ -109,15 +119,15 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={ this.handleDeleteConfirmClose } color='primary'>
+            <Button onClick={this.handleDeleteConfirmClose} color='primary'>
               取消
             </Button>
-            <Button onClick={ this.handleDeleteAll } color='default' autoFocus>
+            <Button onClick={this.handleDeleteAll} color='default' autoFocus>
               确认
             </Button>
           </DialogActions>
         </Dialog>
-        { isChristmas && <SnowflakeBG /> }
+        {this.isChristmas() && <SnowflakeBG />}
       </div>
     )
   }

@@ -114,9 +114,9 @@ class SnowflakeBG extends PureComponent<SnowflakeBGProps, SnowflakeBGState> {
       left: 0,
       bottom: 0,
       right: 0,
-      opacity: 0.5
+      opacity: 0.7
     } }>
-      <h1>Merry Christmas</h1>
+      <h1 className='merry-christmas'>Merry Christmas</h1>
 
     </div>;
   }
