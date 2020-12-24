@@ -9,3 +9,15 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+.action-btns {
+  .save-btn-wrapper{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .save-btn-loading{
+      position: absolute;
+      color: #4baf4f;
+    }
+  }
+}

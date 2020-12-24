@@ -1,14 +1,13 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import './App.css'
 import './main.scss'
-import html2canvas from 'html2canvas'
 import 'date-fns'
 import Button from '@material-ui/core/Button'
 import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import { DialogContentText, Switch } from '@material-ui/core'
+import { CircularProgress, DialogContentText, Switch } from '@material-ui/core'
 import EventEditor from './components/EventEditor'
 import TagEditor from './components/Tags/components/TagEditor'
 import Tags from './components/Tags'
@@ -16,27 +15,30 @@ import CalendarView from './components/CalendarView'
 import { getImgSrc, generate, downloadFile } from './utils'
 import { connect, DispatchProp } from 'react-redux'
 import { setEvents } from './redux/actions/events'
-import SnowflakeBG from './components/SnowflakeBG/SnowflakeBG'
 import clickShowIconPopUp from './utils/clickShowIconPopUp'
 import { ChristmasIcons } from './constants'
 
 interface AppState {
   deleteConfirmDialogOpen: boolean
   withAnimation: boolean
+  downloadLoading: boolean
 }
 
 interface AppProps {
   removeStoreSub: Function
 }
 
+const SnowflakeBGLazy = React.lazy(() => import('./components/SnowflakeBG/SnowflakeBG'))
+
 class App extends React.Component<AppProps & DispatchProp, AppState> {
-  componentDidMount() {
+  componentDidMount () {
     this.isChristmas() && clickShowIconPopUp(ChristmasIcons, !this.state.withAnimation)
   }
 
   state = {
     deleteConfirmDialogOpen: false,
     withAnimation: true,
+    downloadLoading: false,
   }
 
   handleDeleteAll = () => {
@@ -47,30 +49,44 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
   handleSave = () => {
     const mainTarget = document.querySelector('main')
     if (mainTarget) {
-      html2canvas(mainTarget, {
-        ignoreElements: (el) =>
-          el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg' || el.className === 'snowflake-control',
-      }).then(function (canvas: HTMLCanvasElement) {
-        downloadFile(generate(), getImgSrc(canvas))
+      this.setState({
+        downloadLoading: true
+      })
+      import('html2canvas').then((res) => {
+        res.default(mainTarget, {
+          ignoreElements: (el) =>
+            el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg' || el.className === 'snowflake-control',
+        }).then(function (canvas: HTMLCanvasElement) {
+          downloadFile(generate(), getImgSrc(canvas))
+        }).finally(() => {
+          this.setState({
+            downloadLoading: false
+          })
+        })
+      }).catch(err => {
+        console.log(err)
+        this.setState({
+          downloadLoading: false
+        })
       })
     }
   }
 
-  setDleteConfirmDialogOpen = (open: boolean) => {
+  setDeleteConfirmDialogOpen = (open: boolean) => {
     this.setState({
       deleteConfirmDialogOpen: open,
     })
   }
 
   handleDeleteConfirmClose = () => {
-    this.setDleteConfirmDialogOpen(false)
+    this.setDeleteConfirmDialogOpen(false)
   }
 
   handleDeleteAllPress = () => {
-    this.setDleteConfirmDialogOpen(true)
+    this.setDeleteConfirmDialogOpen(true)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.removeStoreSub()
   }
 
@@ -85,7 +101,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     })
   }
 
-  render() {
+  render () {
     return (
       <div className='App'>
         <main>
@@ -93,29 +109,32 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             <div className='calendar-wrapper'>
               <CalendarView />
             </div>
-            {this.isChristmas && (
+            { this.isChristmas && (
               <div className='snowflake-control'>
-                <span>{this.state.withAnimation ? '隐藏雪花' : '想看下雪'}</span>
+                <span>{ this.state.withAnimation ? '隐藏雪花' : '想看下雪' }</span>
                 <Switch
-                  checked={this.state.withAnimation}
-                  onChange={this.handleSwitch}
+                  checked={ this.state.withAnimation }
+                  onChange={ this.handleSwitch }
                   color='primary'
                   name='openAnimation'
                   size='small'
                 />
               </div>
-            )}
+            ) }
           </div>
           <div className='side-bar'>
             <div className='tags-wrapper'>
               <Tags isDisplay />
             </div>
             <div className='action-btns'>
-              <Button onClick={this.handleSave} variant='contained' color='primary' fullWidth>
-                保存
-              </Button>
+              <div className='save-btn-wrapper'>
+                <Button onClick={ this.handleSave } variant='contained' color='primary' fullWidth disabled={ this.state.downloadLoading }>
+                  保存
+                </Button>
+                { this.state.downloadLoading && <CircularProgress size={ 24 } className='save-btn-loading' /> }
+              </div>
               <Button
-                onClick={this.handleDeleteAllPress}
+                onClick={ this.handleDeleteAllPress }
                 variant='contained'
                 color='secondary'
                 fullWidth
@@ -128,8 +147,8 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
         <EventEditor />
         <TagEditor />
         <Dialog
-          open={this.state.deleteConfirmDialogOpen}
-          onClose={this.handleDeleteConfirmClose}
+          open={ this.state.deleteConfirmDialogOpen }
+          onClose={ this.handleDeleteConfirmClose }
           aria-labelledby='alert-dialog-title'
           aria-describedby='alert-dialog-description'
         >
@@ -140,15 +159,22 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleDeleteConfirmClose} color='primary'>
+            <Button onClick={ this.handleDeleteConfirmClose } color='primary'>
               取消
             </Button>
-            <Button onClick={this.handleDeleteAll} color='default' autoFocus>
+            <Button onClick={ this.handleDeleteAll } color='default' autoFocus>
               确认
             </Button>
           </DialogActions>
         </Dialog>
-        {this.isChristmas() && this.state.withAnimation && <SnowflakeBG />}
+        {/* {this.isChristmas() && this.state.withAnimation && <SnowflakeBG /> } */ }
+        {
+          this.isChristmas() && this.state.withAnimation && (
+            <Suspense fallback={ null }>
+              <SnowflakeBGLazy />
+            </Suspense>
+          )
+        }
       </div>
     )
   }
