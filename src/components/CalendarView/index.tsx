@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import _ from 'lodash'
+import isEqual from 'lodash/isEqual'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -12,7 +12,7 @@ import {
   setEvents,
   setCurrentEvent,
   toggleEventModal,
-  setEventsRange
+  setEventsRange,
 } from '../../redux/actions/events'
 
 export interface CalendarEventSelectArgType {
@@ -75,15 +75,15 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
       textColor,
       id,
       allDay,
-      extendedProps: { tagId = '' }
+      extendedProps: { tagId = '' },
     } = e.event
-    const targetIndex = events.findIndex(e => e.id === id)
+    const targetIndex = events.findIndex((e) => e.id === id)
     events.splice(targetIndex, 1)
 
     this.props.dispatch(
       setEvents([
         ...events,
-        { title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId }
+        { title, start, end, backgroundColor, borderColor, textColor, id, allDay, tagId },
       ])
     )
   }
@@ -115,7 +115,7 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
       textColor,
       id,
       allDay,
-      extendedProps: { tagId = '' }
+      extendedProps: { tagId = '' },
     } = e.event
     this.props.dispatch(
       setCurrentEvent({
@@ -127,7 +127,7 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
         textColor,
         id,
         allDay,
-        tagId
+        tagId,
       })
     )
     this.handleOpenEventModal()
@@ -140,7 +140,7 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
         header={{
           left: 'title',
           center: '',
-          right: ' prev today next'
+          right: ' prev today next',
         }}
         height='parent'
         events={events}
@@ -161,14 +161,14 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
   }
 
   shouldComponentUpdate(nextProps: CalendarViewProps) {
-    return !_.isEqual(nextProps.events, this.props.events)
+    return isEqual(nextProps.events, this.props.events)
   }
 }
 
 const mapStateToProps = (state: StoreStateType) => {
   return {
     events: state.events.events,
-    currentEvent: state.events.currentEvent
+    currentEvent: state.events.currentEvent,
   }
 }
 

@@ -8,15 +8,10 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import { CircularProgress, DialogContentText, Switch } from '@material-ui/core'
-import EventEditor from './components/EventEditor'
-import TagEditor from './components/Tags/components/TagEditor'
-import Tags from './components/Tags'
-import CalendarView from './components/CalendarView'
 import { getImgSrc, generate, downloadFile } from './utils'
 import { connect, DispatchProp } from 'react-redux'
 import { setEvents } from './redux/actions/events'
-import clickShowIconPopUp from './utils/clickShowIconPopUp'
-import { ChristmasIcons } from './constants'
+import LoadingView from './components/LoadingView'
 
 interface AppState {
   deleteConfirmDialogOpen: boolean
@@ -29,10 +24,31 @@ interface AppProps {
 }
 
 const SnowflakeBGLazy = React.lazy(() => import('./components/SnowflakeBG/SnowflakeBG'))
+const CalendarViewLazy = React.lazy(() => import('./components/CalendarView'))
+const EventEditorLazy = React.lazy(() => import('./components/EventEditor'))
+const TagEditorLazy = React.lazy(() => import('./components/Tags/components/TagEditor'))
+const TagsLazy = React.lazy(() => import('./components/Tags'))
 
 class App extends React.Component<AppProps & DispatchProp, AppState> {
-  componentDidMount () {
-    this.isChristmas() && clickShowIconPopUp(ChristmasIcons, !this.state.withAnimation)
+  componentDidMount() {
+    this.removeLoading()
+    this.initClickPopUp()
+  }
+
+  removeLoading = () => {
+    if (document.getElementById('full-screen-loading')) {
+      document.getElementById('full-screen-loading')!.remove()
+    }
+  }
+
+  initClickPopUp = () => {
+    if (this.isChristmas()) {
+      import('./utils/clickShowIconPopUp').then((res) => {
+        import('./constants').then((constants) => {
+          res.default(constants.ChristmasIcons)
+        })
+      })
+    }
   }
 
   state = {
@@ -50,25 +66,33 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     const mainTarget = document.querySelector('main')
     if (mainTarget) {
       this.setState({
-        downloadLoading: true
+        downloadLoading: true,
       })
-      import('html2canvas').then((res) => {
-        res.default(mainTarget, {
-          ignoreElements: (el) =>
-            el.className === 'fc-right' || el.className === 'action-btns' || el.id === 'snowflake-bg' || el.className === 'snowflake-control',
-        }).then(function (canvas: HTMLCanvasElement) {
-          downloadFile(generate(), getImgSrc(canvas))
-        }).finally(() => {
+      import('html2canvas')
+        .then((res) => {
+          res
+            .default(mainTarget, {
+              ignoreElements: (el) =>
+                el.className === 'fc-right' ||
+                el.className === 'action-btns' ||
+                el.id === 'snowflake-bg' ||
+                el.className === 'snowflake-control',
+            })
+            .then(function (canvas: HTMLCanvasElement) {
+              downloadFile(generate(), getImgSrc(canvas))
+            })
+            .finally(() => {
+              this.setState({
+                downloadLoading: false,
+              })
+            })
+        })
+        .catch((err) => {
+          console.log(err)
           this.setState({
-            downloadLoading: false
+            downloadLoading: false,
           })
         })
-      }).catch(err => {
-        console.log(err)
-        this.setState({
-          downloadLoading: false
-        })
-      })
     }
   }
 
@@ -86,7 +110,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     this.setDeleteConfirmDialogOpen(true)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.removeStoreSub()
   }
 
@@ -101,40 +125,52 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
     })
   }
 
-  render () {
+  render() {
     return (
       <div className='App'>
         <main>
           <div className='main-content-wrapper'>
             <div className='calendar-wrapper'>
-              <CalendarView />
+              <Suspense fallback={<LoadingView />}>
+                <CalendarViewLazy />
+              </Suspense>
             </div>
-            { this.isChristmas && (
+            {this.isChristmas && (
               <div className='snowflake-control'>
-                <span>{ this.state.withAnimation ? '隐藏雪花' : '想看下雪' }</span>
+                <span>{this.state.withAnimation ? '隐藏雪花' : '想看下雪'}</span>
                 <Switch
-                  checked={ this.state.withAnimation }
-                  onChange={ this.handleSwitch }
+                  checked={this.state.withAnimation}
+                  onChange={this.handleSwitch}
                   color='primary'
                   name='openAnimation'
                   size='small'
                 />
               </div>
-            ) }
+            )}
           </div>
           <div className='side-bar'>
             <div className='tags-wrapper'>
-              <Tags isDisplay />
+              <Suspense fallback={null}>
+                <TagsLazy isDisplay />
+              </Suspense>
             </div>
             <div className='action-btns'>
               <div className='save-btn-wrapper'>
-                <Button onClick={ this.handleSave } variant='contained' color='primary' fullWidth disabled={ this.state.downloadLoading }>
+                <Button
+                  onClick={this.handleSave}
+                  variant='contained'
+                  color='primary'
+                  fullWidth
+                  disabled={this.state.downloadLoading}
+                >
                   保存
                 </Button>
-                { this.state.downloadLoading && <CircularProgress size={ 24 } className='save-btn-loading' /> }
+                {this.state.downloadLoading && (
+                  <CircularProgress size={24} className='save-btn-loading' />
+                )}
               </div>
               <Button
-                onClick={ this.handleDeleteAllPress }
+                onClick={this.handleDeleteAllPress}
                 variant='contained'
                 color='secondary'
                 fullWidth
@@ -144,11 +180,18 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             </div>
           </div>
         </main>
-        <EventEditor />
-        <TagEditor />
+
+        <Suspense fallback={<LoadingView />}>
+          <EventEditorLazy />
+        </Suspense>
+
+        <Suspense fallback={<LoadingView />}>
+          <TagEditorLazy />
+        </Suspense>
+
         <Dialog
-          open={ this.state.deleteConfirmDialogOpen }
-          onClose={ this.handleDeleteConfirmClose }
+          open={this.state.deleteConfirmDialogOpen}
+          onClose={this.handleDeleteConfirmClose}
           aria-labelledby='alert-dialog-title'
           aria-describedby='alert-dialog-description'
         >
@@ -159,22 +202,19 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={ this.handleDeleteConfirmClose } color='primary'>
+            <Button onClick={this.handleDeleteConfirmClose} color='primary'>
               取消
             </Button>
-            <Button onClick={ this.handleDeleteAll } color='default' autoFocus>
+            <Button onClick={this.handleDeleteAll} color='default' autoFocus>
               确认
             </Button>
           </DialogActions>
         </Dialog>
-        {/* {this.isChristmas() && this.state.withAnimation && <SnowflakeBG /> } */ }
-        {
-          this.isChristmas() && this.state.withAnimation && (
-            <Suspense fallback={ null }>
-              <SnowflakeBGLazy />
-            </Suspense>
-          )
-        }
+        {this.isChristmas() && this.state.withAnimation && (
+          <Suspense fallback={null}>
+            <SnowflakeBGLazy />
+          </Suspense>
+        )}
       </div>
     )
   }

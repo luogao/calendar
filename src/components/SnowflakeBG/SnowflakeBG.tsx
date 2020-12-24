@@ -29,7 +29,7 @@ class SnowflakeBG extends PureComponent<SnowflakeBGProps, SnowflakeBGState> {
   mouseX = 0
   mouseY = 0
   fallSpeen = 2
-  amount = 1000
+  amount = 500
 
   componentDidMount () {
     this.init()

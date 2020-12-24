@@ -5,7 +5,8 @@ import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { Provider } from 'react-redux'
 import store from './redux'
-import _ from 'lodash'
+import isEqual from 'lodash/isEqual'
+import uniq from 'lodash/uniq'
 import { setSelectedTags } from './redux/actions/tags'
 import { StoreStateType } from './redux/reducers'
 import { EventType } from './types'
@@ -15,7 +16,7 @@ let currentValue: StoreStateType | null = null
 function handleChange () {
   let previousValue = currentValue
   currentValue = store.getState()
-  if (!_.isEqual(previousValue, currentValue) && currentValue) {
+  if (!isEqual(previousValue, currentValue) && currentValue) {
     const { start, end } = currentValue.events.eventRange
     const currentViewEvents = (currentValue.events.events as Array<EventType>).filter(
       (e: EventType) => {
@@ -27,7 +28,7 @@ function handleChange () {
         )
       }
     )
-    const currentEventsTags = _.uniq(
+    const currentEventsTags = uniq(
       (currentViewEvents as Array<EventType>)
         .filter(event => event.tagId !== '')
         .map(event => event.tagId)
