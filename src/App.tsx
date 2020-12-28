@@ -135,7 +135,7 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
                 <CalendarViewLazy />
               </Suspense>
             </div>
-            {this.isChristmas && (
+            {this.isChristmas() && (
               <div className='snowflake-control'>
                 <span>{this.state.withAnimation ? '隐藏雪花' : '想看下雪'}</span>
                 <Switch
