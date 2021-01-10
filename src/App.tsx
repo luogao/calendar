@@ -218,6 +218,14 @@ class App extends React.Component<AppProps & DispatchProp, AppState> {
       </div>
     )
   }
+
+  shouldComponentUpdate(nextProps: AppProps & DispatchProp, nextState: AppState) {
+    return (
+      this.state.withAnimation !== nextState.withAnimation ||
+      this.state.downloadLoading !== nextState.downloadLoading ||
+      this.state.deleteConfirmDialogOpen !== nextState.deleteConfirmDialogOpen
+    )
+  }
 }
 
 export default connect()(App)

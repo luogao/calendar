@@ -161,7 +161,7 @@ class CalendarView extends Component<CalendarViewProps & DispatchProp> {
   }
 
   shouldComponentUpdate(nextProps: CalendarViewProps) {
-    return isEqual(nextProps.events, this.props.events)
+    return !isEqual(nextProps.events, this.props.events)
   }
 }
 
